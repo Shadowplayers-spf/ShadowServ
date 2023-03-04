@@ -3,7 +3,6 @@ import Config from './config.js';
 import ShadowServ from './modules/ShadowServ.js';
 import Ebas from './modules/Ebas.js';
 import DB from './modules/DB.js';
-import { ShopItem } from './modules/Shop.js';
 
 (async () => {
     
@@ -19,10 +18,6 @@ import { ShopItem } from './modules/Shop.js';
     server.begin();
     server.addComponent("ebas", new Ebas(Config.ebas_id, Config.ebas_key));
 
-    // Testing
-    const item = new ShopItem();
-    const out = await ShopItem.get(1);
-    console.log("Item", out);
     
 })();
 

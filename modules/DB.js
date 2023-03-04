@@ -8,7 +8,6 @@ export default class DB{
         this.id = 0;
         this.created = "";
         this.updated = "";
-        this.load(params);
     }
 
     load( params ){
@@ -33,7 +32,7 @@ export default class DB{
         }
     }
 
-    static async get( fields = {} ){
+    static async get( fields = {}, limit = false ){
         if( !isNaN(fields) )
             fields = {id : fields};
 
@@ -51,6 +50,9 @@ export default class DB{
         if( keys.length ){
             query += " WHERE " + keys.join(",");
         }
+        limit = Math.trunc(limit);
+        if( limit > 0 )
+            query += " LIMIT "+limit;
         const rows = await this.query(query, vals);
         return rows.map(row => new this(row));
 

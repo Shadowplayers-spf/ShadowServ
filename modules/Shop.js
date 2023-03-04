@@ -14,8 +14,6 @@ export default class Shop extends Component{
 
 }
 
-
-
 export class ShopItem extends DB{
 
     static table = "shop_items";
