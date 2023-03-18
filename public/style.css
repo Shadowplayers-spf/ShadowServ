@@ -1,1 +1,174 @@
+:root {
+    --color-cyberpunk: #F66;
+    --font-cyberpunk: 'Cyberway Riders';
+    --shadow-default: 0.25vmax 0.25vmax 1vmax #000;
+    --radius-default: 1vmax;
+}
+
+@font-face {
+    font-family: 'Cyberway Riders';
+    src: url('media/CyberwayRiders.woff2') format('woff2'),
+        url('media/CyberwayRiders.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+h1{
+    color:var(--color-cyberpunk);
+    font-size:6vmax;
+    text-shadow: var(--shadow-default);
+}
+h2{
+    font-size:4vmax;
+    color:var(--color-cyberpunk);
+    text-shadow: var(--shadow-default);
+}
+h3{
+    font-size:3vmax;
+    color:var(--color-cyberpunk);
+    text-shadow: var(--shadow-default);
+}
+
+body{
+    color:#CCC;
+    font-family: Arial, Helvetica, sans-serif; 
+}
+*{
+    position: relative;
+}
+*.hidden{
+   display:none !important; 
+}
+*.right{
+    text-align: right;
+}
+*.noMargin{
+    margin:0;
+    padding:0;
+}
+*.cyberpunk{
+    font-family: var(--font-cyberpunk);
+}
+a, a:visited{
+    color:#FFF; 
+    text-decoration: none;
+    font-weight: bold;  
+}
+a:active{
+    transform:scale(1.1);
+}
+
+/* Forms */
+input{
+    padding:1vmax;
+    display:block;
+    width:auto;
+    margin-bottom: 0.5vmax;
+    border: var(--color-cyberpunk) 1px solid;
+    background:rgba(0,0,0,0.75);
+    box-shadow: var(--shadow-default);
+    border-top-right-radius: var(--radius-default);
+    color:#FFF;
+}
+input[type=submit]{
+    font-family: var(--font-cyberpunk);
+    color: var(--color-cyberpunk);
+
+}
+
+
+#bg{
+    
+    font-size:1vmax;
+    position: fixed;
+    left:0; right:0;
+    top:0; bottom:0;
+
+    background-color: #000;
+    background: linear-gradient(to bottom, #45484d 0%,#000000 100%);
+    background-size:cover;
+    
+}
+#logo{
+    width:100vmin;
+    height:100vmin;
+    position: fixed;
+    pointer-events: none;
+    background-image: url(media/splogo.svg);
+    background-size: contain;
+    bottom:0;
+    opacity:0.1;
+}
+#content,
+body > div.content > div.page{
+    position: fixed;
+    left:0; right:0;
+    top:0; bottom:0;
+}
+
+/* Error / Notice */
+#errors{
+    position: fixed;
+    left:0; top:0; right:0;
+}
+
+@keyframes err{
+    from{box-shadow: 0 0 1vmax #FAA;}
+    to{box-shadow: 0 0 2vmax #FAA;}
+}
+@keyframes notice{
+    from{box-shadow: 0 0 1vmax #AFF;}
+    to{box-shadow: 0 0 2vmax #AFF;}
+}
+
+#errors > div.error{
+    padding:1vmax;
+    background:#A33;
+    border:2px solid #FAA;
+    color: #FAA;
+    margin:0.5vmax;
+    border-top-right-radius: var(--radius-default);
+    animation: err 1s ease-in-out alternate infinite;
+    font-weight: bold;
+    font-size: 3vmax;
+    text-align: center;
+    opacity:1;
+    transition:opacity 1s;
+}
+#errors > div.error.notice{
+    background:#3AA;
+    border:2px solid #AFF;
+    color: #AFF;
+    animation: notice 1s ease-in-out alternate infinite;
+}
+#errors > div.error.fade{
+    opacity:0;
+}
+
+
+/* Login / Register */
+#page-login,
+#page-signup
+{
+    position: absolute;
+    top:50%;
+    left:0; right:0;
+    bottom:auto;
+    padding:0 3vw;
+    transform:translateY(-50%);
+}
+#page-login form,
+#page-signup form{
+    display:flex;
+    flex-wrap: wrap;
+}
+#page-login form input,
+#page-signup form input{
+    font-size: 3vmax;
+    width:100%;
+}
+
+
+
 

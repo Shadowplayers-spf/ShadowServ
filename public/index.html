@@ -8,10 +8,47 @@
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<script type="module">
-			import ShadowServ from './classes/ShadowServ.js';
+		<div id="bg"></div>
+		<div id="logo"></div>
+		<div id="content" class="content">
+			<div id="page-login" class="page">
+				<h2 class="cyberpunk noMargin">ShadowServ...</h2>
+				<form id="login">
+					<input type="text" name="username" placeholder="Användarnamn" required />
+					<input type="password" name="password" placeholder="Lösenord" required />
+					<input type="submit" value="Logga In" />
+				</form>
+				<p class="right"><a data-href="signup">Nytt Konto</a></p>
+			</div>
 			
-			window.app = new ShadowServ();
+			<div id="page-signup" class="page hidden">
+				<h2 class="cyberpunk noMargin">Registrera</h2> 
+				<form id="signup">
+					<input type="text" name="username" placeholder="Användarnamn" required />
+					<input type="password" name="password0" placeholder="Lösenord" required />
+					<input type="password" name="password1" placeholder="Lösenord Igen" required />
+					<input type="text" name="discord" placeholder="Discord ID (valfritt)" />
+					<input type="submit" value="Registrera" />
+				</form>
+			</div>
+			
+			<div id="page-user" class="page hidden">
+				TODO: USER LOGGED IN
+			</div>
+
+		</div>
+
+
+		<div id="errors"></div>
+
+		<script type="module">
+			import pm from "./pages.js";
+			import Rest from './classes/Rest.js';
+
+			window.rest = Rest;
+			window.pm = pm;
+			pm.begin();
+			
 
 		</script>
 	</body>

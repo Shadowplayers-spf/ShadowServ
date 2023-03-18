@@ -28,6 +28,7 @@ export default class ShadowServ{
             }catch(err){
                 out.success = false;
                 out.response = err.message;
+                console.error("Err", err);
             }
 
             res.json(out);
@@ -75,10 +76,10 @@ export default class ShadowServ{
 
 class Rest{
 
-    constructor( server, body = {} ){
+    constructor( server, req = {} ){
 
         this.server = server;
-        this.body = body;
+        this.body = req.body;
         this.user = new User();
 
     }
@@ -93,7 +94,7 @@ class Rest{
     async exec(){
 
         await this.getUser();
-        const 
+        let 
             task = this.body.task,
             args = this.body.args
         ;
@@ -119,18 +120,22 @@ class Rest{
     }
 
     
-    async pubRegister( nick, password0, password1 ){
+    async pubRegister( nick, password0, password1, discord = "" ){
+
+        console.log("nick", nick);
+        nick = String(nick).trim();
+        password0 = String(password0);
+        password1 = String(password1);
+        discord = String(discord).trim();
 
         const user = new User();
         this.user = user;
 
-        user.nick = nick;
-        user.password = password0;
         if( password0 !== password1 )
             throw new Error("Passwords don't match");
 
         // The rest is handled by User
-        await user.register();
+        await user.register(nick, password0, discord);
 
         const out = this.user.getOut();
         out.session_token = this.user.session_token;
@@ -141,7 +146,10 @@ class Rest{
     // Fetches userdata and generates a new 
     async pubLogin( nick, password ){
 
-        await this.user.login(nick, password);
+        const att = await this.user.logIn(nick, password);
+        if( !att ){
+            throw new Error("Felaktig användare/lösenord. Försök igen!");
+        }
         const out = this.user.getOut();
         out.session_token = this.user.session_token;
         return out;
