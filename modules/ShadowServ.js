@@ -21,7 +21,8 @@ export default class ShadowServ{
             const rest = new Rest(this, req);
             let out = {
                 success : true,
-                response : {}
+                response : {},
+                usr : 0,
             };
             try{
                 out.response = await rest.exec();
@@ -31,6 +32,7 @@ export default class ShadowServ{
                 console.error("Err", err);
             }
 
+            out.usr = rest.user.id;
             res.json(out);
 
         });
@@ -86,8 +88,10 @@ class Rest{
 
     async getUser(){
 
-        if( !this.body.token )
+        if( this.body.token )
             await this.user.loadByToken(this.body.token);
+        if( this.user.isLoggedIn() )
+            await this.user.refreshToken();
 
     }
 
@@ -108,9 +112,9 @@ class Rest{
         fn = "pvt"+task;
         if( typeof this[fn] === "function" ){
 
-            if( !this.user.isLoggedIn() )
+            if( !this.user.isLoggedIn() ){
                 throw new Error("Access denied");
-
+            }
             return await this[fn].call(this, ...args);
 
         }
@@ -119,6 +123,12 @@ class Rest{
 
     }
 
+    // Gets userdata for active user
+    async pubGetUser(){
+
+        return this.user.getOut(true);
+
+    }
     
     async pubRegister( nick, password0, password1, discord = "" ){
 
@@ -137,8 +147,7 @@ class Rest{
         // The rest is handled by User
         await user.register(nick, password0, discord);
 
-        const out = this.user.getOut();
-        out.session_token = this.user.session_token;
+        const out = this.user.getOut(true);
         return out;
 
     }
@@ -150,10 +159,17 @@ class Rest{
         if( !att ){
             throw new Error("Felaktig användare/lösenord. Försök igen!");
         }
-        const out = this.user.getOut();
-        out.session_token = this.user.session_token;
+        const out = this.user.getOut(true);
         return out;
         
+    }
+
+    async pvtLogout(){
+        
+        await this.user.destroyToken(true);
+        this.user = new User();
+        return this.user.getOut(true);
+
     }
 
 

@@ -2,7 +2,7 @@
 export default class DbAsset{
 
 
-    load(){
+    load(data){
         if( typeof data !== "object" )
             data = {};
 
@@ -12,11 +12,12 @@ export default class DbAsset{
                 type = typeof this[i]
             ;
 
-            if( !this.hasOwnProperty(data[i]) || type === "function" )
+            if( !this.hasOwnProperty(i) || type === "function" )
                 continue;
 
-            if( type === "number" )
+            if( type === "number" ){
                 this[i] = +v;
+            }
             else if( type === "object" ){
                 
                 let out = {};

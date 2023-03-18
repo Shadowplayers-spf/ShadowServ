@@ -1,12 +1,26 @@
+import User from "./User.js";
 import Rest from "./Rest.js";
 
 export default class PageManager{
 
     constructor(){
+
         this.pages = {};
         this.page = null;
         this.errors = new Map();    // index -> UserError()
         this.errIndex = 0;
+        this.user = new User();
+
+    }
+
+    setUser( user ){
+
+        if( !(user instanceof User) )
+            throw new Error("User not of type User");
+
+        this.user = user;
+        localStorage.token = user.session_token;
+
     }
 
     async begin(){
@@ -14,11 +28,21 @@ export default class PageManager{
         let page = window.location.hash;
         if( page.charAt(0) === "#" )
             page = page.substring(1);
+
+        
+
+        // First off, get user data
+        if( localStorage.token ){
+            const user = await this.restReq("GetUser");
+            this.setUser(new User(user));
+        }
+        
         if( page )
             await this.setPage(page);
 
+        console.log("user exists", this.user.exists());
         if( !this.page )
-            this.setPage("login");
+            await this.setPage(this.user.exists() ? "user" : "login");
 
     }
 
@@ -31,6 +55,8 @@ export default class PageManager{
         if( !page )
             return false;
 
+        if( !this.user.exists() && page.private )
+            return false;
         
         await page.onLoad();
         if( !page.firstLoad ){
@@ -45,15 +71,14 @@ export default class PageManager{
         this.page = page;
         page.getDom().classList.toggle("hidden", false);
         window.location.hash = id;
-        console.log("onBuild", page);
         await this.page.onBuild();
         return true;
 
     }
 
-    addPage(id, onLoad, onBuild, onUnload){
+    addPage(id, pvt, onLoad, onBuild, onUnload){
 
-        const p = new Page(this, id, onLoad, onBuild, onUnload);
+        const p = new Page(this, id, pvt, onLoad, onBuild, onUnload);
         this.pages[id] = p;
         return p;
 
@@ -85,17 +110,20 @@ export default class PageManager{
     async restReq( task, data ){
 
         const req = new Rest(task, data);
+        let out = false;
         try{
-
-            const att = await req.run();
-            return att;
-
+            out = await req.run();
         }
         catch(err){
             this.addError(err.message);
             console.log(err);
         }
-        return false;
+
+        if( this.page?.private && !req.usr ){
+            this.addError("Du har loggats ut.");
+            this.setPage("login");
+        }
+        return out;
 
     }
 
@@ -148,11 +176,12 @@ export class UserError{
 }
 
 export class Page{
-    constructor(parent, id, onLoad, onBuild, onUnload){
+    constructor(parent, id, pvt = true, onLoad, onBuild, onUnload){
         
         this.parent = parent;
         this.firstLoad = false;     // Available in onLoad, lets you bind static stuff
         this.id = id;
+        this.private = pvt;         // Requires login
 
         if( onLoad )
             this.onLoad = onLoad;

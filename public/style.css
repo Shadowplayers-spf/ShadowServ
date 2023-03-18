@@ -58,6 +58,10 @@ a, a:visited{
 a:active{
     transform:scale(1.1);
 }
+p.subtitle{
+    margin-top: -0.5vmax;
+    margin-left: 0.5vmax;
+}
 
 /* Forms */
 input{
@@ -78,6 +82,8 @@ input[type=submit]{
 }
 
 
+
+
 #bg{
     
     font-size:1vmax;
@@ -91,13 +97,14 @@ input[type=submit]{
     
 }
 #logo{
-    width:100vmin;
-    height:100vmin;
+    
     position: fixed;
     pointer-events: none;
     background-image: url(media/splogo.svg);
     background-size: contain;
-    bottom:0;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    bottom:0; top:0; left:0; right:0;
     opacity:0.1;
 }
 #content,
@@ -147,9 +154,10 @@ body > div.content > div.page{
 }
 
 
-/* Login / Register */
+/* Login / Register / Loading */
 #page-login,
-#page-signup
+#page-signup,
+#page-loading
 {
     position: absolute;
     top:50%;
@@ -169,6 +177,8 @@ body > div.content > div.page{
     width:100%;
 }
 
-
-
+/* User */
+#page-user{
+    padding:3vmin 6vmin;
+}
 

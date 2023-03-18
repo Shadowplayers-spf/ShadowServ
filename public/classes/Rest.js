@@ -5,6 +5,7 @@ export default class Rest{
         this.task = task;
         this.args = args;
         this.success = false;
+        this.usr = 0;           // Each request also responds with the user id. Useful for check if you've been logged out.
         this.response = {};
 
     }
@@ -26,6 +27,7 @@ export default class Rest{
 
         const data = await response.json();
         
+        this.usr = data.usr;
         this.success = data.success;
         this.response = data.response;
         if( !this.success )

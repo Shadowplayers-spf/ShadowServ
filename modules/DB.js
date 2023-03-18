@@ -54,8 +54,11 @@ export default class DB{
         if( limit > 0 )
             query += " LIMIT "+limit;
         const rows = await this.query(query, vals);
-        return rows.map(row => new this(row));
-
+        const out = rows.map(row => new this(row));
+        if( limit === 1 )
+            return out[0];
+        return out;
+        
     }
 
 

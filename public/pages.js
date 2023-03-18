@@ -1,10 +1,12 @@
+import User from "./classes/User.js";
 import PageManager from "./classes/Page.js";
 
 const pm = new PageManager();
 export default pm;
 
 pm.addPage(
-    "login",
+    "login",    // id
+    false,      // private
     // onLoad
     async function(){
 
@@ -23,7 +25,10 @@ pm.addPage(
             
             const req = await pm.restReq("Login", [user, pass]);
             if( req ){
-                console.log("Todo: Handle user login response ", req);
+                
+                this.parent.setUser(new User(req));
+                this.parent.setPage("user");
+                
             }
 
         };
@@ -37,7 +42,8 @@ pm.addPage(
 
 
 pm.addPage(
-    "signup",
+    "signup",       // id
+    false,          // private
     // onLoad
     async function(){
 
@@ -56,9 +62,10 @@ pm.addPage(
                 discord = dom.querySelector("input[name=discord]").value
             ;
             
-            const req = await pm.restReq("Register", [user, pass0, pass1, discord]);
+            const req = await this.restReq("Register", [user, pass0, pass1, discord]);
             if( req ){
-                console.log("Todo: Handle registration response ", req);
+                pm.setUser(new User(req));
+                pm.setPage("user");
             }
 
         };
@@ -71,13 +78,22 @@ pm.addPage(
 
 
 pm.addPage(
-    "user",
+    "user",     // id
+    true,       // Private
     // onLoad
     async function(){
 
     },
     // onBuild
     async function(){
+        
+        const user = pm.user,
+            dom = this.getDom()
+        ;
+        dom.querySelector("h1.username").innerText = user.nick;
+        dom.querySelector("a.logOut").onclick = async () => {
+            await pm.restReq("Logout"); 
+        };
 
     },
     // onUnload
@@ -85,6 +101,7 @@ pm.addPage(
 
     }
 );
+
 
 
 
