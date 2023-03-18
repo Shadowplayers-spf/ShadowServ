@@ -209,7 +209,7 @@ export class Page{
 
     autoBind(){
         
-        this.getDom().querySelectorAll("a[data-href]").forEach(el => {
+        this.getDom().querySelectorAll("[data-href]").forEach(el => {
             el.onclick = this.onHref.bind(this);
         });
 

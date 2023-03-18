@@ -18,6 +18,7 @@ export default class User extends DB{
         this.discord = "";
         this.session_token = "";
         this.session_token_generated = 0;
+        this.shop_credit = 0;       // Hela ören
 
         this.load(data);
     }
@@ -34,6 +35,7 @@ export default class User extends DB{
             out.discord = this.discord;
             out.member = this.member;
             out.session_token = this.session_token;
+            out.shop_credit = this.shop_credit;
         }
         return out;
 
@@ -127,6 +129,7 @@ export default class User extends DB{
         return User.query("UPDATE "+User.table+" SET session_token_generated=UNIX_TIMESTAMP() WHERE id=?", [this.id]);
 
     }
+
 
 }
 

@@ -12,6 +12,7 @@ export default class User extends DbAsset{
         this.created = "";
         this.updated = "";
         this.session_token = "";
+        this.shop_credit = 0;       // Öre
 
         this.load(data);
     }
@@ -22,6 +23,10 @@ export default class User extends DbAsset{
 
     rebase(){
 
+    }
+
+    getCreditSek(){
+        return Math.trunc(this.shop_credit/100);
     }
     
 

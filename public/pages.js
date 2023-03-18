@@ -88,12 +88,17 @@ pm.addPage(
     async function(){
         
         const user = pm.user,
-            dom = this.getDom()
+            dom = this.getDom(),
+            admin = user.privilege >= 10
         ;
         dom.querySelector("h1.username").innerText = user.nick;
         dom.querySelector("a.logOut").onclick = async () => {
             await pm.restReq("Logout"); 
         };
+        dom.querySelector("div.sections > div.section.credit > span.credit").innerText = user.getCreditSek()+" kr";
+        dom.querySelector("span.member").classList.toggle("hidden", !user.member);
+
+        dom.querySelectorAll("div.sections > div.section.admin").forEach(el => el.classList.toggle("hidden", !admin));
 
     },
     // onUnload
@@ -101,7 +106,6 @@ pm.addPage(
 
     }
 );
-
 
 
 
