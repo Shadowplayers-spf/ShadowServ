@@ -61,9 +61,11 @@ pm.addPage(
                 pass1 = dom.querySelector("input[name=password1]").value,
                 discord = dom.querySelector("input[name=discord]").value
             ;
-            
-            const req = await this.restReq("Register", [user, pass0, pass1, discord]);
+
+            const req = await pm.restReq("Register", [user, pass0, pass1, discord]);
+            console.log("Response", req);
             if( req ){
+                console.log("Setting user and page");
                 pm.setUser(new User(req));
                 pm.setPage("user");
             }

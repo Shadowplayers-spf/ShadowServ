@@ -10,8 +10,8 @@ export default class User extends DB{
         super(data);
 
         this.nick = "";
-        this.privilege = 1;
-        this.member = 1;
+        this.privilege = 0;
+        this.member = 0;
         this.created = "";
         this.updated = "";
         this.password = "";
@@ -50,7 +50,7 @@ export default class User extends DB{
 
         // Get by nick
         let template = await User.get({nick : nick}, 1);
-        if( !template.id )
+        if( !template?.id )
             return false;
         
         const validatePass = await Bcrypt.compare(pass, template.password);
@@ -96,11 +96,16 @@ export default class User extends DB{
         this.nick = nick;
         this.password = await Bcrypt.hash(pass, 10);
         const ex = await User.get({nick}, 1);
-        if( ex.id )
+        if( ex?.id )
             throw new Error("User already exists");
 
-        await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, discord) VALUES (?,?,?,?,?)", [this.nick, 1, 0, this.password, this.discord]);
+        const q = await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, discord) VALUES (?,?,?,?,?)", [this.nick, 1, 0, this.password, this.discord]);
+        this.id = q.insertId;
+        if( !this.id )
+            return false;
+
         await this.generateToken(true);
+
         return true;
 
     }
