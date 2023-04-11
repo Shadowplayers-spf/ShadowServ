@@ -62,19 +62,87 @@ export default class DB{
     }
 
 
-    async query( query, params = [] ){
+    async query( query, params = [], transaction = undefined ){
 
-        return this.constructor.query(query, params);   
+        return this.constructor.query(query, params, transaction);   
 
     }
 
-    static async query( query, params = [] ){
+
+    static async getConnection(){
+
+        return await new Promise((res, rej) => {
+            this.pool.getConnection((err, conn) => {
+                if( err ){
+                    rej(err);
+                    return;
+                }
+                res(conn);
+            });
+        });
+
+    }
+
+    // Finalizes and releases connection
+    static async finalizeTransaction( conn ){
+
+        return await new Promise((res,rej) => {
+            
+            conn.commit(err => {
+                if( err ){
+                    rej(err);
+                    return;
+                }
+                conn.release();
+                res();
+            });
+            
+        });
+
+    }
+
+    // Rollbacks and releases connection
+    static async rollbackTransaction( conn ){
+
+        return await new Promise((res,rej) => {
+
+            conn.rollback(() => {
+                conn.release();
+                res();
+            });
+
+        });
+        
+
+    }
+
+    static async getTransactionConnection(){
+
+        const conn = await this.getConnection();
+        return await new Promise((res,rej) => {
+            conn.beginTransaction(err => {
+                
+                if( err ){
+                    rej(err);
+                    return;
+                }
+                res(conn);
+
+            });
+        });
+
+    }
+
+    static async query( query, params = [], transaction = undefined ){
         
         return await new Promise((res, rej) => {
-            this.pool.query(query, params, (err, results) => {
+            const targ = transaction ? transaction : this.pool;
+            targ.query(query, params, (err, results) => {
+
                 if( err )
                     return rej(err);
                 res(results);
+
             })
         });
 

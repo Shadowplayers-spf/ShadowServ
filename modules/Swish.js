@@ -10,7 +10,7 @@ import crypto from 'crypto';
 
 export default class Swish{
 
-	constructor( live = false ){
+	static begin( live = false ){
 		
 		this.live = live;
 		this.spSwishNumber = live ? Config.swishNumber : '1234679304';
@@ -28,12 +28,14 @@ export default class Swish{
 
 	}
 
+	
+
 
 	/*
 		Creates a Swish invoice.
 		Returns the transaction UUID if successful.
 	*/
-	async createInvoice( userID, phone, amount = 10 ){
+	static async createInvoice( userID, phone, amount = 10 ){
 
 		userID = String(userID);
 		phone = String(phone);
@@ -70,7 +72,7 @@ export default class Swish{
 			//const responseData = att.data;
 			return uuid;
 		}catch(err){
-			console.log("Failed", err.response.data);
+			console.log("Failed", err?.response?.data || err);
 		}
 
 		throw new Error("Swish-fel. Försök igen eller kontakta en administratör.");
@@ -83,7 +85,7 @@ export default class Swish{
 		You're probably looking for "status" which can be
 		ERROR / PAID CANCELLED DECLINED or ??undefined?? the Swish API docs completely lacks this documentation ¯\_(ツ)_/¯
 	*/
-	async getInvoice( uuid ){
+	static async getInvoice( uuid ){
 
 		try{
 			const att = await this.client.get("https://mss.cpc.getswish.net/swish-cpcapi/api/v1/paymentrequests/"+uuid);

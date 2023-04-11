@@ -66,6 +66,18 @@ export default class User extends DB{
 
     }
 
+    async addShopCredit( wholeSek = 0, transaction = undefined ){
+
+        wholeSek = Math.trunc(wholeSek);
+        if( !wholeSek )
+            throw new Error("Invalid amount of shop credit to add");
+        wholeSek *= 100; // Convert to cents
+
+        await this.query("UPDATE "+this.constructor.table+" SET shop_credit = shop_credit+? WHERE id=?", [wholeSek, this.id], transaction);
+        this.shop_credit += wholeSek; 
+
+    }
+
     async loadByToken( token ){
 
         if( !token )
