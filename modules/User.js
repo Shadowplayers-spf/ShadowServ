@@ -12,8 +12,6 @@ export default class User extends DB{
         this.nick = "";
         this.privilege = 0;
         this.member = 0;
-        this.created = "";
-        this.updated = "";
         this.password = "";
         this.discord = "";
         this.session_token = "";
@@ -93,6 +91,10 @@ export default class User extends DB{
 
     isLoggedIn(){
         return ( this.privilege && this.id );
+    }
+
+    isAdmin(){
+        return this.privilege >= 10;
     }
 
     async register( nick, pass, discord ){

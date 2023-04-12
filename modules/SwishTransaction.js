@@ -14,11 +14,8 @@ export default class SwishTransaction extends DB{
 
         super(...arguments);
 
-		this.id = 0;
 		this.user = 0;
 		this.uuid = '';
-		this.created = '';
-		this.updated = '';
 		this.status = SwishTransaction.STATUS_PENDING;
 
 		this.load(...arguments);

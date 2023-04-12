@@ -2,6 +2,7 @@ import User from './modules/User.js';
 import Swish from './modules/Swish.js';
 import SwishTransaction from './modules/SwishTransaction.js';
 import DB from './modules/DB.js';
+import { ShopItem } from './modules/ShopItem.js';
 
 export default class Rest{
 
@@ -32,10 +33,12 @@ export default class Rest{
         if( !Array.isArray(args) )
             args = [args];
     
+        // Public tasks
         let fn = "pub"+task;
         if( typeof this[fn] === "function" )
             return await this[fn].call(this, ...args);
         
+        // Logged in tasks
         fn = "pvt"+task;
         if( typeof this[fn] === "function" ){
 
@@ -45,6 +48,19 @@ export default class Rest{
             return await this[fn].call(this, ...args);
 
         }
+
+        // Admin tasks
+        fn = "adm"+task;
+        if( typeof this[fn] === "function" ){
+
+            if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
+                throw new Error("Access denied");
+            }
+            return await this[fn].call(this, ...args);
+
+        }
+    
+                
 
         throw new Error("Task invalid: "+task);
 
@@ -90,6 +106,14 @@ export default class Rest{
         
     }
 
+
+
+
+
+
+
+
+    /* Pvt: LOGIN REQUIRED */
     async pvtLogout(){
         
         await this.user.destroyToken(true);
@@ -138,6 +162,70 @@ export default class Rest{
             throw err; // Rethrow and let the parent catch handle it.
             
         }        
+
+    }
+
+    // Todo: Get shop items
+    /*
+        Gets an array of active shop items
+        Note: Admins also get inactive shop items
+    */
+    async pvtGetShopItems(){
+
+        // Todo: Continue
+
+    }
+    
+    // Todo: Purchase shop item
+    async pvtPurchaseShopItem(){
+
+        // Todo: Continue
+
+
+    }
+
+
+
+
+
+
+
+    /* Adm: ADMIN REQUIRED */
+    /*
+        Creates or updates admin a shop item
+        id : id of the item to alter. 0 creates a new one
+        data can contain any of the keys defined in ShopItem. Name is required if you're creating a new one.
+    */
+    async admCreateShopItem( id, data = {} ){
+
+        if( typeof data !== "object" )
+            throw new Error("Data invalid for ShopItem");
+
+        id = Math.trunc(id);
+        
+        if( !id && !String(data.name).trim() )
+            throw new Error("Ett namn krävs för varje produkt.");
+
+        let cur = new ShopItem();
+        // Update an existing one
+        if( id > 0 ){
+            cur = await ShopItem.get(id);
+            if( !cur )
+                throw new Error("Produkten hittades inte");
+        }
+
+        // Update fields
+        for( let field of ShopItem.ADMIN_SETTABLE ){
+            
+            if( data.hasOwnProperty(field) )
+                cur[field] = data[field];
+
+        }
+        await cur.saveOrInsert();
+
+        // Todo: Handle image upload after making sure it's inserted
+
+        return cur.getOut(true);
 
     }
 
