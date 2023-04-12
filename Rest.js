@@ -236,7 +236,7 @@ export default class Rest{
             return el.getOut();
 
         });
-        
+
         const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
         const purchaseItems = boughtItems.map(el => el.getOut());
 
@@ -272,7 +272,7 @@ export default class Rest{
         let cur = new ShopItem();
         // Update an existing one
         if( id > 0 ){
-            cur = await ShopItem.get(id);
+            cur = await ShopItem.get(id, 1);
             if( !cur )
                 throw new Error("Produkten hittades inte");
         }

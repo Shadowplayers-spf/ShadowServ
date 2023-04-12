@@ -5,6 +5,7 @@ import Ebas from './modules/Ebas.js';
 import DB from './modules/DB.js';
 import Swish from './modules/Swish.js';
 import UnitTests from './unit_tests.js';
+import { ShopItem } from './modules/ShopItem.js';
 
 (async () => {
     
@@ -34,8 +35,33 @@ import UnitTests from './unit_tests.js';
     await UnitTests.run('getUser');
 
     // Refresh a swish transaction for a user
-    await UnitTests.run('refreshTransactions');
+    //await UnitTests.run('refreshTransactions');
     
-    
+    // Create or update a shop item
+    /*
+    await UnitTests.run('createShopItem', [1, {
+        name : "Test Item",
+        description: "This is a temp description!", 
+        barcode : 'A123456789', 
+        active : 1,
+        stock : 10, 
+        cost : 10e2, 
+        image : 'tmp.jpg', 
+        age_restriction : 0, 
+        type : ShopItem.TYPES.MISC, 
+        comment : 'This is an admin comment'
+    }]);
+    */
+
+    // List shop items. Admins will get disabled ones too.
+    //await UnitTests.run('getShopItems');
+
+    // Make a purchase
+    //await UnitTests.run('purchaseShopItem', [1]);
+
+    // Get my purchase history
+    await UnitTests.run('getPurchaseHistory');
+
+
 })();
 

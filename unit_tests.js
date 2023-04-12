@@ -15,7 +15,7 @@ out.run = async function( name, args = [] ){
 
 			const out = await this[name](...args);
 			console.log("Unit test result for "+name+" : ");
-			console.log(out);
+			console.dir(out, {depth:20});
 
 		}
 		catch(err){
@@ -65,13 +65,56 @@ out.getUser = function(){
     });
 	
 
+};
+
+out.getShopItems = function(){
+
+	return this.server.runRest({
+        body : {
+            task : 'GetShopItems',
+            token : this.token,
+            args : [],
+        }
+    });
+
+};
+
+
+out.purchaseShopItem = function( item ){
+
+	return this.server.runRest({
+        body : {
+            task : 'PurchaseShopItem',
+            token : this.token,
+            args : [item],
+        }
+    });
+
+};
+
+out.getPurchaseHistory = function(){
+
+	return this.server.runRest({
+        body : {
+            task : 'GetPurchaseHistory',
+            token : this.token,
+            args : [],
+        }
+    });
+
 }
 
-// Todo:
-// pvtGetShopItems
-// pvtPurchaseShopItem
-// pvtGetPurchaseHistory
-// admCreateShopItem
+out.createShopItem = function(id, data){
+
+	return this.server.runRest({
+        body : {
+            task : 'CreateShopItem',
+            token : this.token,
+            args : [id, data],
+        }
+    });
+
+}
 
 
 export default out;

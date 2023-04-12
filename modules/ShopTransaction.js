@@ -41,7 +41,7 @@ export default class ShopTransaction extends DB{
         if( item < 1 || user < 1 )
             throw new Error("Invalid item or user passed to transaction.");
 
-        const out = new self({
+        const out = new this({
             item, user
         });
         const q = await this.query("INSERT INTO "+this.table+" (item, user, amountPaid) VALUES (?,?,?)", [item, user, amountPaid], transaction);
@@ -59,7 +59,10 @@ export default class ShopTransaction extends DB{
         if( !user )
             throw new Error("Invalid user");
 
-        const q = await this.query("SELECT * FROM "+this.table+" WHERE user=? AND created > DATE_SUB(NOW(), INTERVAL 1 YEAR) ORDER BY created DESC");
+        const q = await this.query(
+            "SELECT * FROM "+this.table+" WHERE user=? AND created > DATE_SUB(NOW(), INTERVAL 1 YEAR) ORDER BY created DESC",
+            [user]
+        );
         return q.map(el => new this(el));
 
     }
