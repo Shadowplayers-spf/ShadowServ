@@ -22,7 +22,7 @@ export class ShopItem extends DB{
         this.name = "";
         this.description = "";
         this.barcode = "";
-        this.active = 1;
+        this.active = 0;
         this.stock = 0;
         this.cost = 1500;   // ören
         this.image = "";
@@ -87,6 +87,41 @@ export class ShopItem extends DB{
         ]);
 
     }
+
+    // Used with an SQL transaction to subtract stock. Safer than overwriting stock.
+    async subtractStock( transaction ){
+        
+        await this.query("UPDATE "+this.constructor.table+" SET stock = stock-1 WHERE id=?", [this.id], transaction);
+        this.stock -= 1;
+        
+    }
+
+    /*
+        Gets a list of all shop items 
+    */
+    static async getAll( includeInactive = false ){
+
+        const filters = {};
+        if( !includeInactive )
+            filters.active = 1;
+
+        return await this.get(filters);
+
+    }
+
+    // Gets all items specified by an array of IDs
+    static async getMultipleById( ids = [] ){
+
+        if( !Array.isArray(ids) )
+            throw new Error("ID list for ShopItem invalid.");
+        
+        ids = ids.map(el => Math.trunc(el) || 0);
+        const qs = ids.map(() => '?');
+        const rows = await this.query("SELECT * FROM "+this.table+" WHERE ID IN ("+qs.join(',')+")", ids);
+        return rows.map(el => new this(el));
+
+    }
+
 
 }
 

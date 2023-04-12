@@ -67,5 +67,11 @@ out.getUser = function(){
 
 }
 
+// Todo:
+// pvtGetShopItems
+// pvtPurchaseShopItem
+// pvtGetPurchaseHistory
+// admCreateShopItem
+
 
 export default out;

@@ -3,6 +3,7 @@ import Swish from './modules/Swish.js';
 import SwishTransaction from './modules/SwishTransaction.js';
 import DB from './modules/DB.js';
 import { ShopItem } from './modules/ShopItem.js';
+import ShopTransaction from './modules/ShopTransaction.js';
 
 export default class Rest{
 
@@ -148,8 +149,9 @@ export default class Rest{
             for( let result of results )
                 amountPaid += result;
 
+            // amountPaid is in whole SEK. We have to convert it to cents.
             if( amountPaid )
-                await this.user.addShopCredit(amountPaid, conn); // Note: AddShopCredit takes whole SEK
+                await this.user.addShopCredit(amountPaid*100, conn);
             
             await DB.finalizeTransaction(conn); // Finalizes and releases
 
@@ -165,25 +167,86 @@ export default class Rest{
 
     }
 
-    // Todo: Get shop items
     /*
         Gets an array of active shop items
         Note: Admins also get inactive shop items
     */
     async pvtGetShopItems(){
 
-        // Todo: Continue
-
+        const isAdmin = this.user.isAdmin();
+        const out = await ShopItem.getAll(isAdmin);
+        return out.map(el => el.getOut(isAdmin));
+        
     }
     
-    // Todo: Purchase shop item
-    async pvtPurchaseShopItem(){
+    async pvtPurchaseShopItem( itemID ){
+        
+        itemID = Math.trunc(itemID);
+        if( itemID < 1 )
+            throw new Error("Invalid item ID. Contact an administrator.");
 
-        // Todo: Continue
+        const item = await ShopItem.get(itemID, 1);
+        if( !item || !item.active )
+            throw new Error("Produkten hittades inte.");
 
+        if( item.cost > this.user.shop_credit )
+            throw new Error("För lite kiosk-kredit på kontot. Har du nyligen överfört pengar måste du trycka på refresh-knappen på förstasidan.");
+
+        // Use a MYSQL transaction in case something fails
+        const conn = await DB.getTransactionConnection();
+        try{
+            
+            await this.user.subShopCredit(item.cost, conn);
+            await item.subtractStock(conn);
+            const tx = await ShopTransaction.create(item.id, this.user.id, item.cost, conn);
+            if( !tx.id )
+                throw new Error("Unable to create receipt, contact an admin.");
+            
+            await DB.finalizeTransaction(conn);
+
+        }catch(err){
+            
+            await DB.rollbackTransaction(conn);
+            throw err; // Rethrow and let the parent catch handle it.
+
+        }
+
+        return true;
 
     }
 
+    /* 
+        Gets your purchase history in the past year.
+        returns {
+            purchases : [
+                ShopTransaction0,1,2...
+            ],
+            items : [
+                ShopItem1,2,3... Note: Includes inactive.
+            ]
+        }
+    */
+    async pvtGetPurchaseHistory(){
+
+        const purchases = await ShopTransaction.getAllByUser(this.user);
+        const items = new Map(); // Creates a map of unique items
+        const purchaseData = purchases.map(el => {
+            
+            items.set(el.item, true);
+            return el.getOut();
+
+        });
+        
+        const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
+        const purchaseItems = boughtItems.map(el => el.getOut());
+
+        return {
+            purchases : purchaseData,
+            boughtItems : purchaseItems
+        };
+
+
+    }
 
 
 

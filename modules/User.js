@@ -64,15 +64,35 @@ export default class User extends DB{
 
     }
 
-    async addShopCredit( wholeSek = 0, transaction = undefined ){
+    // Transaction is a MYSQL transaction, which isn't required but should be used for security reasons
+    async addShopCredit( credit = 0, transaction = undefined ){
 
-        wholeSek = Math.trunc(wholeSek);
-        if( !wholeSek )
+        credit = Math.trunc(credit);
+        if( !credit )
             throw new Error("Invalid amount of shop credit to add");
-        wholeSek *= 100; // Convert to cents
+            
+        await this.query("UPDATE "+this.constructor.table+" SET shop_credit = shop_credit+? WHERE id=?", [credit, this.id], transaction);
+        this.shop_credit += credit; 
 
-        await this.query("UPDATE "+this.constructor.table+" SET shop_credit = shop_credit+? WHERE id=?", [wholeSek, this.id], transaction);
-        this.shop_credit += wholeSek; 
+    }
+
+    // Same as above, but for subtracting without allowing it to go negative
+    async subShopCredit( credit, transaction ){
+
+        credit = Math.trunc(credit);
+        if( !credit )
+            throw new Error("Invalid amount of SEK to subtract");
+        
+        const q = await this.query(
+            "UPDATE "+this.constructor.table+" SET shop_credit = shop_credit-? WHERE shop_credit >= ? AND id=?", 
+            [credit, credit, this.id],
+            transaction
+        );
+
+        if( !q.changedRows )
+            throw new Error("Insufficient funds in shop credit subtract.");
+        
+        this.shop_credit -= credit;
 
     }
 
