@@ -37,6 +37,7 @@
 				</form>
 			</div>
 			
+			<!-- User page -->
 			<div id="page-user" class="page hidden">
 				<h1 class="cyberpunk noMargin username"></h1>
 				<p class="subtitle">
@@ -44,30 +45,38 @@
 					<a class="logOut">Logga Ut</a>
 				</p>
 				<div class="sections">
-					<div class="section credit">
+					<div class="section credit" data-href="credits">
 						<img src="media/crown-coin.svg" />
 						<span class="credit">loading...</span>
 					</div>
-					<div class="section assets">
+					<div class="section assets" data-href="assets">
 						<img src="media/game-console.svg" />
-						Spel
+						Våra Spel
 					</div>
-					<div class="section admin users hidden">
+					<div class="section store" data-href="store">
+						<img src="media/shopping-cart.svg" />
+						Kiosken
+					</div>
+					<div class="section admin users hidden" data-href="users">
 						<img src="media/two-shadows.svg" />
 						[A] Användare
-					</div>
-					<div class="section admin assetEdit">
-						<img src="media/game-console.svg" />
-						[A] Inventarier
-					</div>
-					<div class="section admin store">
-						<img src="media/shopping-cart.svg" />
-						[A] Kiosken
 					</div>
 				</div>
 			</div>
 
+			<!-- Shop page -->
+			<div id="page-store" class="page hidden">
+				<div class="products"></div>
+			</div>
 
+
+		</div>
+
+		<div id="modal" class="hidden">
+			<div class="wrap">
+				<div class="content"></div>
+				<input type="button" class="close" value="Stäng" />
+			</div>
 		</div>
 
 

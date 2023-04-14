@@ -109,6 +109,74 @@ pm.addPage(
     }
 );
 
+pm.addPage(
+    "store",     // id
+    true,       // Private
+    // onLoad
+    async function(){
+
+        const products = await pm.restReq("GetShopItems");
+        this.data.set("products", products);
+        
+        this._getProductById = id => {
+            const prod = this.data.get("products");
+            for( let p of prod ){
+                if( p.id === id )
+                    return p;
+            }
+        };
+
+        this._onProductClick = event => {
+            
+            const id = +event.currentTarget.dataset.id;
+            const prod = this._getProductById(id);
+            if( !prod )
+                return;
+
+            const content = this.make("div");
+            this.make('h3', prod.name, [], content);
+            this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], content);
+            this.make('p', prod.description, ['desc'], content);
+            
+
+            this.setModal(content);
+            
+        };
+
+    },
+    // onBuild
+    async function(){
+        
+        const dom = this.getDom();
+        const products = this.data.get("products");
+        
+        const divProducts = dom.querySelector("div.products");
+        
+        for( let product of products ){
+
+            const div = this.make("div", '', 'product');
+            div.dataset.id = product.id;
+            divProducts.append(div);
+
+            let c = this.make('p', product.name, 'title');
+            div.append(c);
+
+            c = this.make('p', product.cost/100 + " kr", 'cost');
+            div.append(c);
+
+            // Todo: Image
+
+            div.onclick = this._onProductClick;
+            
+        }
+
+    },
+    // onUnload
+    async function(){
+
+    }
+);
+
 
 
 

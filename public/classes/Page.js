@@ -182,6 +182,7 @@ export class Page{
         this.firstLoad = false;     // Available in onLoad, lets you bind static stuff
         this.id = id;
         this.private = pvt;         // Requires login
+        this.data = new Map();
 
         if( onLoad )
             this.onLoad = onLoad;
@@ -195,6 +196,10 @@ export class Page{
     getDom(){
         return document.querySelector("#page-"+this.id);
     }
+
+    // Nonstatic version of make
+    make(...args){return this.constructor.make(...args);}
+    setModal(...args){return this.constructor.setModal(...args);}
 
     async onLoad(){};
     async onBuild(){};
@@ -212,6 +217,46 @@ export class Page{
         this.getDom().querySelectorAll("[data-href]").forEach(el => {
             el.onclick = this.onHref.bind(this);
         });
+
+    }
+
+
+    // makes an element
+    static make( type = 'div', text = '', classList = [], parent = false ){
+        
+        if( !Array.isArray(classList) )
+            classList = [classList];
+
+        const out = document.createElement(type);
+        out.innerText = text;
+        out.classList.add(...classList);
+        if( parent )
+            parent.append(out);
+        return out;
+
+    }
+
+    static clearModal(){
+        this.setModal();
+    }
+
+    static setModal( content ){
+        
+        const modal = document.getElementById("modal");
+
+        if( !content ){
+            modal.classList.toggle('hidden', true);
+            return;
+        }
+
+        if( typeof content === "string" )
+            content = this.make('p', content);
+
+        const contentDiv = modal.querySelector("div.wrap > div.content");
+        contentDiv.replaceChildren(content);
+        modal.classList.toggle('hidden', false);
+        modal.onclick = this.clearModal.bind(this);
+        contentDiv.onclick = event => {event.stopImmediatePropagation();};
 
     }
 

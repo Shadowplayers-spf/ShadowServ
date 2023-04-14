@@ -1,0 +1,6 @@
+Frontend:
+- Add edit button to shop items for admins
+- Add admin editor for items
+	- Image upload 
+- Add proper nav system
+

@@ -60,7 +60,7 @@ import { ShopItem } from './modules/ShopItem.js';
     //await UnitTests.run('purchaseShopItem', [1]);
 
     // Get my purchase history
-    await UnitTests.run('getPurchaseHistory');
+    //await UnitTests.run('getPurchaseHistory');
 
 
 })();

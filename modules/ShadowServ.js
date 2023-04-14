@@ -19,7 +19,7 @@ export default class ShadowServ{
         this.app.use(express.json());
         this.app.post("/api", async (req, res) => {
             
-            res.json(await runRest(req));
+            res.json(await this.runRest(req));
 
         });
 		this.app.listen(this.port, () => {
