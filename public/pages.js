@@ -128,18 +128,30 @@ pm.addPage(
 
         this._onProductClick = event => {
             
+            const user = this.parent.user;
             const id = +event.currentTarget.dataset.id;
             const prod = this._getProductById(id);
             if( !prod )
                 return;
 
-            const content = this.make("div");
-            this.make('h3', prod.name, [], content);
-            this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], content);
-            this.make('p', prod.description, ['desc'], content);
-            
+            const bg = this.make("div", "", ["shopBg"]);
+            // Todo: Image
 
-            this.setModal(content);
+            const info = this.make("div", "", ["shopItemData"]);
+            this.make('h2', prod.name, [], info);
+            this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], info);
+            this.make('p', prod.description, ['desc'], info);
+            
+            if( user.isAdmin() ){
+                
+                const button = this.make("input", "", [], info);
+                button.value = "Redigera";
+                button.type = "button";
+                button.dataset.href = "storeEdit/"+String(id);
+
+            }
+
+            this.setModal([bg, info], false);
             
         };
 
@@ -169,6 +181,51 @@ pm.addPage(
             div.onclick = this._onProductClick;
             
         }
+
+    },
+    // onUnload
+    async function(){
+
+    }
+);
+
+
+
+
+pm.addPage(
+    "storeEdit",    // id
+    true,           // Private
+    // onLoad
+    async function(){
+
+        const products = await pm.restReq("GetShopItems");
+        this.data.set("products", products);
+        
+        this._getProductById = id => {
+            const prod = this.data.get("products");
+            for( let p of prod ){
+                if( p.id === id )
+                    return p;
+            }
+        };
+
+    },
+    // onBuild
+    async function( id ){
+        
+        const dom = this.getDom();
+        const products = this.data.get("products");
+        let product = this._getProductById(id);
+        // Create a new one instead
+        if( !product ){
+            product = {};
+            id = 0;
+        }
+        const form = document.getElementById("shopItem");
+        const categoryInput = form.querySelector("select.type");
+        
+        // Todo: add categories
+
 
     },
     // onUnload

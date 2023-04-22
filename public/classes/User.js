@@ -28,6 +28,10 @@ export default class User extends DbAsset{
     getCreditSek(){
         return Math.trunc(this.shop_credit/100);
     }
+
+    isAdmin(){
+        return this.privilege >= 10;
+    }
     
 
 }

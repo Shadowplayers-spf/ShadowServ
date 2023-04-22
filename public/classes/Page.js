@@ -50,7 +50,10 @@ export default class PageManager{
         return this.pages[id];
     }
     async setPage( id ){
-        
+
+        const args = String(id).split("/");
+        id = args.shift();
+
         const page = this.getPage(id);
         if( !page )
             return false;
@@ -58,7 +61,7 @@ export default class PageManager{
         if( !this.user.exists() && page.private )
             return false;
         
-        await page.onLoad();
+        await page.onLoad(...args);
         if( !page.firstLoad ){
             page.firstLoad = true;
             page.autoBind();
@@ -70,8 +73,8 @@ export default class PageManager{
         document.querySelectorAll("#content > div.page").forEach(el => el.classList.toggle("hidden", true));
         this.page = page;
         page.getDom().classList.toggle("hidden", false);
-        window.location.hash = id;
-        await this.page.onBuild();
+        window.location.hash = id+"/"+args.join("/");
+        await this.page.onBuild(...args);
         return true;
 
     }
@@ -205,19 +208,10 @@ export class Page{
     async onBuild(){};
     async onUnload(){};
 
-    onHref( evt ){
-        
-        const page = evt.currentTarget.dataset.href;
-        this.parent.setPage(page);
-        
-    }
-
     autoBind(){
         
-        this.getDom().querySelectorAll("[data-href]").forEach(el => {
-            el.onclick = this.onHref.bind(this);
-        });
-
+        this.constructor.autoBind(this.getDom());
+        
     }
 
 
@@ -240,23 +234,50 @@ export class Page{
         this.setModal();
     }
 
-    static setModal( content ){
+    static onHref( evt ){
+        
+        const page = evt.currentTarget.dataset.href;
+        window.pm.setPage(page); // Ugly, but good enough for now
+        
+    }
+
+    static autoBind( div ){
+
+        div.querySelectorAll("[data-href]").forEach(el => {
+            el.onclick = this.onHref.bind(this);
+        });
+
+    }
+
+    static setModal( divs, padding = true ){
         
         const modal = document.getElementById("modal");
 
-        if( !content ){
+        if( !divs ){
             modal.classList.toggle('hidden', true);
             return;
         }
 
-        if( typeof content === "string" )
-            content = this.make('p', content);
+        if( !Array.isArray(divs) )
+            divs = [divs];
+
+        divs = divs.map(el => {
+
+            if( typeof el === "string" )
+                return this.make('p', el);
+            return el;
+
+        });
+        
 
         const contentDiv = modal.querySelector("div.wrap > div.content");
-        contentDiv.replaceChildren(content);
+        contentDiv.classList.toggle("noPadding", !padding);
+        contentDiv.replaceChildren(...divs);
         modal.classList.toggle('hidden', false);
         modal.onclick = this.clearModal.bind(this);
         contentDiv.onclick = event => {event.stopImmediatePropagation();};
+
+        this.autoBind(contentDiv);
 
     }
 

@@ -10,6 +10,7 @@
         --white-default: #EEE;
         --black-default:#111;
         --modal-bg: rgba(129,59,59,0.85);
+        --modal-content-padding: 2vmax 2vmax 5vmax 2vmax;
     }
 
     @font-face {
@@ -86,6 +87,10 @@
         font-family: var(--font-cyberpunk);
         color: var(--color-cyberpunk);
 
+    }
+
+    .cost{
+        color: #AFA;
     }
 
 
@@ -205,11 +210,17 @@
         border-top-right-radius: var(--radius-default);
         overflow:visible;
     }
+    #modal{
+        left:0; right:0;
+    }
     #modal > div.wrap > div.content{
-        padding:2vmax 2vmax 5vmax 2vmax;
+        padding:var(--modal-content-padding);
         overflow:auto;
         top:0; bottom:0; left:0; right:0;
         font-size:3vmax;
+    }
+    #modal > div.wrap > div.content.noPadding{
+        padding:0;
     }
 
     #modal > div.wrap > input{
@@ -297,7 +308,35 @@
     #page-store div.products > div.product p.title{
         font-weight: bold;
     }
+
+    /* Shop item modal */
+    div.shopBg{
+        background-size: cover;
+        position: absolute;
+        left:0; top:0; right:0; bottom:0;
+    }
+    div.shopItemData{
+        overflow:auto;
+        background:var(--background-black-default);
+        border-radius: var(--radius-default);
+        padding: var(--modal-content-padding);
+    }
+    
+    div.shopItemData > h2, div.shopItemData > p{
+        margin: 0 0 1vmax 0;
+    }
+    
     
 
 /**/
 
+
+/* Page: Store edit */
+
+    #page-storeEdit{
+        padding:2vmax;
+    }
+
+
+
+/**/
