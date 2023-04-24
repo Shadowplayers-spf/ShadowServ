@@ -20,8 +20,13 @@ export default class DB{
                 
                 const data = params[i];
                 const type = typeof this[i];
-                if( type === "object" )
-                    this[i] = JSON.parse(data);
+                if( type === "object" ){
+                    try{
+                        this[i] = JSON.parse(data);
+                    }catch(err){
+                        console.error("Field "+i+" is supposed to be JSON, but is not. It was ", data, "in", this);
+                    }
+                }
                 else if( type === "number" || type === "boolean"  )
                     this[i] = +data;
                 else

@@ -1,6 +1,11 @@
 
 export default class DbAsset{
 
+    constructor(){
+        this.id = 0;
+        this.created = '';
+        this.updated = '';
+    }
 
     load(data){
         if( typeof data !== "object" )

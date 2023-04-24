@@ -1,6 +1,8 @@
 import express from 'express';
 import Rest from '../Rest.js';
-
+import Multer from 'multer';
+import fs from 'fs';
+const mul = Multer({dest : 'tmp'}); // Relative to index
 
 export default class ShadowServ{
 	
@@ -17,7 +19,7 @@ export default class ShadowServ{
 		
         this.app.use(express.static('public'));
         this.app.use(express.json());
-        this.app.post("/api", async (req, res) => {
+        this.app.post("/api", mul.any(), async (req, res) => {
             
             res.json(await this.runRest(req));
 
@@ -42,6 +44,17 @@ export default class ShadowServ{
             out.success = false;
             out.response = err.message;
             console.error("Err", err);
+        }
+
+        // Always unlink files
+        if( req.files ){
+            try{
+                for( let file of req.files ){
+                    fs.unlink(file.path, () => {});
+                }
+            }catch(err){
+                console.error("Caught unlink error", err);
+            }
         }
 
         out.usr = rest.user.id;

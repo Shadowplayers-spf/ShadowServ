@@ -12,19 +12,29 @@ export default class Rest{
 
     async run(){
 
-        const response = await fetch("/api", {
-            method : "post",
-            headers : {
+        const rData = {
+            method : "POST"
+        };
+
+
+        if( this.args instanceof FormData ){
+            rData.body = this.args;
+            rData.body.append('task', this.task);
+            rData.body.append('token', localStorage.token);
+        }
+        else{
+            rData.headers = {
                 "Accept" : "application/json",
-                "Content-Type" : "application/json"
-            },
-            body : JSON.stringify({
+                "Content-Type" : "application/json",
+            };
+            rData.body = JSON.stringify({
                 task : this.task,
                 args : this.args,
                 token : localStorage.token
-            })
-        });
+            });
+        }
 
+        const response = await fetch("/api", rData);
         const data = await response.json();
         
         this.usr = data.usr;

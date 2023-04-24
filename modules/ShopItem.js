@@ -45,7 +45,8 @@ export class ShopItem extends DB{
             active : this.active,
             cost : this.cost,
             image : this.image,
-            age_restriction : this.age_restriction
+            age_restriction : this.age_restriction,
+            type : this.type
         };
         if( admin ){
             

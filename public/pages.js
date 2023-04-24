@@ -1,5 +1,6 @@
 import User from "./classes/User.js";
 import PageManager from "./classes/Page.js";
+import ShopItem from "./classes/ShopItem.js";
 
 const pm = new PageManager();
 export default pm;
@@ -115,7 +116,8 @@ pm.addPage(
     // onLoad
     async function(){
 
-        const products = await pm.restReq("GetShopItems");
+        let products = await pm.restReq("GetShopItems");
+        products = products.map(el => new ShopItem(el));
         this.data.set("products", products);
         
         this._getProductById = id => {
@@ -151,7 +153,7 @@ pm.addPage(
 
             }
 
-            this.setModal([bg, info], false);
+            pm.setModal([bg, info], false);
             
         };
 
@@ -163,30 +165,30 @@ pm.addPage(
         const products = this.data.get("products");
         
         const divProducts = dom.querySelector("div.products");
-        
+        const prods = [];
         for( let product of products ){
 
             const div = this.make("div", '', 'product');
             div.dataset.id = product.id;
-            divProducts.append(div);
+            prods.push(div);
 
-            let c = this.make('p', product.name, 'title');
-            div.append(c);
-
-            c = this.make('p', product.cost/100 + " kr", 'cost');
-            div.append(c);
+            this.make('p', product.name, 'title', div);
+            this.make('p', product.cost/100 + " kr", 'cost', div);
 
             // Todo: Image
 
             div.onclick = this._onProductClick;
             
         }
+        divProducts.replaceChildren(...prods);
 
     },
     // onUnload
     async function(){
 
-    }
+    },
+    // Back
+    "user"
 );
 
 
@@ -198,7 +200,8 @@ pm.addPage(
     // onLoad
     async function(){
 
-        const products = await pm.restReq("GetShopItems");
+        let products = await pm.restReq("GetShopItems");
+        products = products.map(el => new ShopItem(el));
         this.data.set("products", products);
         
         this._getProductById = id => {
@@ -209,29 +212,89 @@ pm.addPage(
             }
         };
 
+        this._form = document.getElementById("shopItem");
+        this._inputs = {};
+
+        const all = this._form.querySelectorAll("[name]");
+        for( let el of all )
+            this._inputs[el.name] = el;
+        
+
     },
     // onBuild
     async function( id ){
         
-        const dom = this.getDom();
-        const products = this.data.get("products");
+        id = Math.trunc(id);
+        // Fields that can be loaded directly by value
+        const autoFields = [
+            "name",
+            "barcode",
+            "stock",
+            "cost",
+            "age_restriction",
+            "comment"
+        ];
+
+        
         let product = this._getProductById(id);
         // Create a new one instead
         if( !product ){
             product = {};
             id = 0;
         }
-        const form = document.getElementById("shopItem");
-        const categoryInput = form.querySelector("select.type");
         
-        // Todo: add categories
 
+        // Update the fields
+        const cats = [];
+        for( let i in ShopItem.TYPES ){
+            const opt = this.make('option', i);
+            opt.value = i;
+            if( product.type === i )
+                opt.selected = true;
+            cats.push(opt);
+        }
+        this._inputs.type.replaceChildren(...cats);
+         
+        for( let field of autoFields )
+            this._inputs[field].value = product[field];
+        this._inputs.description.innerText = product.description;
+        this._inputs.active.checked = Boolean(product.active);
+        
+
+        // Handle submit
+        this._form.onsubmit = async event => {
+            event.preventDefault();
+
+            const out = new FormData();
+            const jData = {};
+            for( let f of autoFields )
+                jData[f] = this._inputs[f].value;
+
+            jData.type = this._inputs.type.value;
+            jData.description = this._inputs.description.value;
+            jData.active = +this._inputs.active.checked;
+
+            // formdata includes file and args
+            out.append('file', this._inputs.image.files[0]);
+            out.append("args", JSON.stringify([id, jData]));
+
+            const ret = await pm.restReq("CreateShopItem", out);
+            pm.addNotice("Produkten har sparats");
+            if( !id )
+                pm.setPage("storeEdit/"+ret.id);
+
+        };
+
+        
+        
 
     },
     // onUnload
     async function(){
 
-    }
+    },
+    // Back
+    "store"
 );
 
 

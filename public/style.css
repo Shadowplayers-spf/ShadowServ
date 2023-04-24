@@ -11,6 +11,11 @@
         --black-default:#111;
         --modal-bg: rgba(129,59,59,0.85);
         --modal-content-padding: 2vmax 2vmax 5vmax 2vmax;
+        --input-margin-bottom: 0.5vmax;
+        --padding-box-default: 1vmax;
+        --border-default: 1px solid var(--color-cyberpunk);
+        --background-black-active: rgba(50,50,50,0.75);
+
     }
 
     @font-face {
@@ -72,21 +77,40 @@
     }
 
     /* Forms */
-    input{
-        padding:1vmax;
+    input, select, textarea{
+        padding:var(--padding-box-default);
         display:block;
         width:auto;
-        margin-bottom: 0.5vmax;
-        border: var(--color-cyberpunk) 1px solid;
+        margin-bottom: var(--input-margin-bottom);
+        border: var(--border-default);
         background:var(--background-black-default);
         box-shadow: var(--shadow-default);
         border-top-right-radius: var(--radius-default);
         color:var(--white-default);
     }
-    input[type=submit]{
+    input[type=submit],input[type=button]{
         font-family: var(--font-cyberpunk);
         color: var(--color-cyberpunk);
-
+    }
+    input[type=submit]:active,input[type=button]:active{
+        background:var(--background-black-active);
+    }
+    textarea{
+        display:block;
+        width:auto;
+    }
+    input[type=checkbox], input[type=radio]{
+        display:inline-block;
+    }
+    label{
+        padding:var(--padding-box-default);
+        display:inline-block;
+        border: var(--border-default);
+        background:var(--background-black-default);
+        box-shadow: var(--shadow-default);
+        border-top-right-radius: var(--radius-default);
+        color:var(--white-default);
+        margin-bottom: var(--input-margin-bottom);
     }
 
     .cost{
@@ -94,6 +118,24 @@
     }
 
 
+    #back{
+        position: fixed;
+        bottom:0; left:0;
+        color:var(--color-cyberpunk);
+        box-shadow: var(--shadow-default);
+        border-top-right-radius: var(--radius-default);
+        background: var(--background-black-default);
+        font-size:5vmax;
+        padding:1vmax 3vmax;
+        font-weight: bold;
+        border: var(--border-default);
+        border-bottom: none;
+        border-left: none;
+        user-select: none;
+    }
+    #back:active{
+        background:var(--background-black-active);
+    }
 
 
     #bg{
@@ -165,9 +207,10 @@
     #errors > div.error.fade{
         opacity:0;
     }
+    
+/**/
 
-
-    /* Login / Register / Loading */
+/* Login / Register / Loading */
     #page-login,
     #page-signup,
     #page-loading
@@ -230,7 +273,6 @@
         left:50%;
         transform: translate(-50%,50%);
     }
-
 
 /**/
 
@@ -299,6 +341,7 @@
     }
     #page-store div.products > div.product:active{
         transform:var(--scale-active);
+        background:var(--background-black-active);
     }
     #page-store div.products > div.product p.title,
     #page-store div.products > div.product p.cost{
@@ -335,6 +378,17 @@
 
     #page-storeEdit{
         padding:2vmax;
+    }
+    #page-storeEdit input,
+    #page-storeEdit select,
+    #page-storeEdit textarea{
+        font-size:2.5vmax;
+    }
+    
+    #page-storeEdit textarea{
+        width:100%;
+        display:inline-block;
+        box-sizing: border-box;
     }
 
 

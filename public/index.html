@@ -77,25 +77,28 @@
 					<input type="text" name="name" />
 					Streckkod<br />
 					<input type="text" name="barcode" />
-					Aktiv<br />
-					<input type="checkbox" name="active" />
+					<label>Aktiv <input type="checkbox" name="active" /></label><br />
 					Lagersaldo<br />
 					<input type="number" name="stock" />
 					Kostnad (ören)<br />
-					<input type="number" name="cost" />
+					<input type="number" name="cost" step="1" min="100" />
 					Bild<br />
-					<input type="file" name="image" />
+					<input type="file" name="image" accept="image/*" />
 					Minimum ålder<br />
-					<input type="number" name="age_restriction" />
+					<input type="number" name="age_restriction" min="0" step="1" />
 					Typ<br />
 					<select name="type"><!-- Generated --></select>
 					Admin-kommentar<br />
 					<input type="text" name="comment" />
+					Beskrivning<br />
 					<textarea name="description"></textarea>
+					<input type="submit" value="Spara" />
 				</form>
 			</div>
+		</div>
 
-
+		<div id="back" class="hidden">
+			«
 		</div>
 
 		<div id="modal" class="hidden">

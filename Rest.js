@@ -5,13 +5,27 @@ import DB from './modules/DB.js';
 import { ShopItem } from './modules/ShopItem.js';
 import ShopTransaction from './modules/ShopTransaction.js';
 
+
 export default class Rest{
 
     constructor( server, req = {} ){
 
+        this.files = req.files;
         this.server = server;
         this.body = req.body;
         this.user = new User();
+        const ct = String(req?.headers?.["content-type"]);
+
+        // multipart/form-data is used for requests with a file. In that request, args are a string and need to be JSON parsed
+        if( ct.startsWith("multipart/form-data") ){
+            if( this.body.args ){
+                try{
+                    this.body.args =  JSON.parse(this.body.args);
+                }catch(err){
+                    this.body.args = [];
+                }
+            }
+        }
 
     }
 
@@ -287,6 +301,9 @@ export default class Rest{
         await cur.saveOrInsert();
 
         // Todo: Handle image upload after making sure it's inserted
+        if( this.files[0] ){
+            console.log("Todo: Handle upload of ", this.files[0]);
+        }
 
         return cur.getOut(true);
 
