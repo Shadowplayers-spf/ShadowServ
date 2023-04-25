@@ -120,6 +120,21 @@ pm.addPage(
         products = products.map(el => new ShopItem(el));
         this.data.set("products", products);
         
+        products.sort((a,b) => {
+
+            if( a.active !== b.active )
+                return a.active ? -1 : 1;
+
+            if( a.type !== b.type )
+                return a.type < b.type ? -1 : 1;
+
+            if( Boolean(a.stock) !== Boolean(b.stock) )
+                return a.stock ? -1 : 1;
+
+            return a.name < b.name ? -1 : 1;
+
+        });
+        
         this._getProductById = id => {
             const prod = this.data.get("products");
             for( let p of prod ){
@@ -128,6 +143,7 @@ pm.addPage(
             }
         };
 
+        // Todo: Improve modal
         this._onProductClick = event => {
             
             const user = this.parent.user;
@@ -166,21 +182,57 @@ pm.addPage(
         
         const divProducts = dom.querySelector("div.products");
         const prods = [];
+        let cat;
         for( let product of products ){
 
-            const div = this.make("div", '', 'product');
+            let pCat = product.getTypeSE();
+            if( !product.active )
+                pCat = 'Inaktiva';
+
+            if( cat !== pCat ){
+                
+                cat = pCat;
+                const div = this.make("div", '', 'category');
+                prods.push(div);
+                this.make('h3', cat, 'cyberpunk', div); 
+
+            }
+                
+
+            const classes = ['product'];
+            if( !product.active )
+                classes.push('inactive');
+            if( !product.stock )
+                classes.push('outOfStock');
+
+            const div = this.make("div", '', classes);
             div.dataset.id = product.id;
             prods.push(div);
 
-            this.make('p', product.name, 'title', div);
-            this.make('p', product.cost/100 + " kr", 'cost', div);
+            const bg = this.make('div', '', 'bg', div);
+            bg.style.backgroundImage = 'url('+product.getImage()+')';
 
-            // Todo: Image
+            const ruler = this.make('div', '', 'ruler', div);
+
+            let name = product.name;
+            if( !product.active )
+                name += ' [Inaktiv]';
+            this.make('p', name, 'title', ruler);
+            
+            const costRow = this.make('p', '', 'costRow', ruler);
+            this.make('span', product.cost/100 + " kr", 'cost', costRow);
+            const stockClasses = ['stock'];
+            if( !product.stock )
+                stockClasses.push('out');
+            this.make('span', ", "+product.stock+" stk", stockClasses, costRow);
 
             div.onclick = this._onProductClick;
             
         }
         divProducts.replaceChildren(...prods);
+
+        dom.querySelector('input.newProduct').classList.toggle('hidden', !this.parent.user.isAdmin());
+        
 
     },
     // onUnload
@@ -214,6 +266,7 @@ pm.addPage(
 
         this._form = document.getElementById("shopItem");
         this._inputs = {};
+        this._submit = this._form.querySelector('input[type=submit]');
 
         const all = this._form.querySelectorAll("[name]");
         for( let el of all )
@@ -239,7 +292,7 @@ pm.addPage(
         let product = this._getProductById(id);
         // Create a new one instead
         if( !product ){
-            product = {};
+            product = new ShopItem();
             id = 0;
         }
         
@@ -260,6 +313,7 @@ pm.addPage(
         this._inputs.description.innerText = product.description;
         this._inputs.active.checked = Boolean(product.active);
         
+        // Todo: Barcode scanner
 
         // Handle submit
         this._form.onsubmit = async event => {
@@ -278,11 +332,13 @@ pm.addPage(
             out.append('file', this._inputs.image.files[0]);
             out.append("args", JSON.stringify([id, jData]));
 
+            this._submit.value = 'Sparar...';
             const ret = await pm.restReq("CreateShopItem", out);
             pm.addNotice("Produkten har sparats");
             if( !id )
                 pm.setPage("storeEdit/"+ret.id);
-
+            this._submit.value = 'Spara';
+            
         };
 
         

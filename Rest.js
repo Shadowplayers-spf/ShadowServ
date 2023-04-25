@@ -4,7 +4,7 @@ import SwishTransaction from './modules/SwishTransaction.js';
 import DB from './modules/DB.js';
 import { ShopItem } from './modules/ShopItem.js';
 import ShopTransaction from './modules/ShopTransaction.js';
-
+import sharp from 'sharp';
 
 export default class Rest{
 
@@ -300,9 +300,25 @@ export default class Rest{
         }
         await cur.saveOrInsert();
 
-        // Todo: Handle image upload after making sure it's inserted
+        // Handle image upload after making sure it's inserted
         if( this.files[0] ){
-            console.log("Todo: Handle upload of ", this.files[0]);
+            
+            try{
+                await sharp(this.files[0].path)
+                .resize({
+                    width:512,
+                    height:512,
+                    withoutEnlargement : true
+                })
+                .jpeg({
+                    quality : 60
+                })
+                .toFile('public/media/uploads/shop/'+cur.id+'.jpg');
+                
+            }catch(err){
+                console.error("Unable to upload file", err);
+            }
+
         }
 
         return cur.getOut(true);

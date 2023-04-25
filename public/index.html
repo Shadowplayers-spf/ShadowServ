@@ -67,6 +67,7 @@
 			<!-- Shop page -->
 			<div id="page-store" class="page hidden">
 				<div class="products"></div>
+				<input type="button" value="Ny Produkt" class="newProduct hidden" data-href="storeEdit/0" />
 			</div>
 
 
@@ -74,9 +75,9 @@
 			<div id="page-storeEdit" class="page hidden">
 				<form id="shopItem">
 					Namn<br />
-					<input type="text" name="name" />
+					<input type="text" name="name" required />
 					Streckkod<br />
-					<input type="text" name="barcode" />
+					<input type="text" name="barcode" required />
 					<label>Aktiv <input type="checkbox" name="active" /></label><br />
 					Lagersaldo<br />
 					<input type="number" name="stock" />

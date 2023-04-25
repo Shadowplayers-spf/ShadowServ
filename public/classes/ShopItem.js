@@ -7,6 +7,11 @@ export default class ShopItem extends DbAsset{
         DRINK : 'DRINK',
         MISC : 'MISC',
     };
+    static TYPES_SE = {
+        FOOD : 'MAT',
+        DRINK : 'DRICKA',
+        MISC : 'BLANDAT',
+    };
 
 	constructor(...args){
 		super(...args);
@@ -17,7 +22,6 @@ export default class ShopItem extends DbAsset{
         this.active = 0;
         this.stock = 0;
         this.cost = 1500;   // ören
-        this.image = "";
         this.age_restriction = 0;
         this.type = ShopItem.TYPES.FOOD;
         this.comment = '';          // Admin-only comment
@@ -25,6 +29,16 @@ export default class ShopItem extends DbAsset{
 
 		this.load(...args);
 	}
+
+    getTypeSE(){
+
+        return this.constructor.TYPES_SE[this.type] || this.type;
+
+    }
+    
+    getImage(){
+        return '/media/uploads/shop/'+this.id+".jpg";
+    }
 
 	rebase(){}
 

@@ -13,7 +13,7 @@ export class ShopItem extends DB{
 
     // Fields that are accepted as is using the admin REST entrypoint
     static ADMIN_SETTABLE = [
-        'name', 'description', 'barcode', 'active', 'stock', 'cost', 'image', 'age_restriction', 'type', 'comment'
+        'name', 'description', 'barcode', 'active', 'stock', 'cost', 'age_restriction', 'type', 'comment'
     ];
 
     constructor(){
@@ -25,7 +25,6 @@ export class ShopItem extends DB{
         this.active = 0;
         this.stock = 0;
         this.cost = 1500;   // ören
-        this.image = "";
         this.age_restriction = 0;
         this.type = ShopItem.TYPES.FOOD;
         this.comment = '';          // Admin-only comment
@@ -44,7 +43,6 @@ export class ShopItem extends DB{
             barcode : this.barcode,
             active : this.active,
             cost : this.cost,
-            image : this.image,
             age_restriction : this.age_restriction,
             type : this.type
         };
@@ -84,8 +82,8 @@ export class ShopItem extends DB{
             this.id = q.insertId;
         }
 
-        await this.query("UPDATE "+this.constructor.table+" SET name=?, description=?, barcode=?, active=?, stock=?, cost=?, image=?, age_restriction=?, comment=?, type=? WHERE id=?", [
-            this.name, this.description, this.barcode, this.active, this.stock, this.cost, this.image, this.age_restriction, this.comment, this.type, this.id
+        await this.query("UPDATE "+this.constructor.table+" SET name=?, description=?, barcode=?, active=?, stock=?, cost=?, age_restriction=?, comment=?, type=? WHERE id=?", [
+            this.name, this.description, this.barcode, this.active, this.stock, this.cost, this.age_restriction, this.comment, this.type, this.id
         ]);
 
     }
