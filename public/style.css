@@ -275,6 +275,9 @@
     #modal > div.wrap > div.content.noPadding{
         padding:0;
     }
+    #modal > div.wrap > div.content.hiddenOverflow{
+        overflow: hidden;
+    }
 
     #modal > div.wrap > input{
         position: absolute;
@@ -282,6 +285,22 @@
         font-size:3vmax;
         left:50%;
         transform: translate(-50%,50%);
+    }
+
+    #modal div.viewport{
+        display:inline-block;
+        vertical-align: top;
+    }
+
+    #modal canvas.scanner{
+        position: relative;
+        display:inline-block;
+        box-sizing: border-box;
+        width:100%;
+        max-height:80vh;
+        object-fit:cover;
+        vertical-align: top;
+        border-top-right-radius: var(--radius-default);
     }
 
 /**/

@@ -111,14 +111,26 @@
 
 
 		<div id="errors"></div>
-
+		<script src="/lib/quagga.min.js"></script>
 		<script type="module">
 			import pm from "./pages.js";
 			import Rest from './classes/Rest.js';
+			import Scanner from './classes/Scanner.js';
 
-			window.rest = Rest;
-			window.pm = pm;
-			pm.begin();
+			(async () => {
+
+				window.rest = Rest;
+				window.pm = pm;
+				window.scanner = new Scanner();
+				await pm.begin();
+				/*
+				Debug barcode scanner
+				window.scanner.run(pm, data => {
+					console.log("Code type ", data.format, "found:", data.code);
+				});
+				*/
+
+			})();
 			
 
 		</script>

@@ -1,6 +1,10 @@
 Frontend:
-- Add edit button to shop items for admins
-- Add admin editor for items
-	- Image upload 
-- Add proper nav system
+- Shop user front end
+	- Improve modal
+- Shop admin editor
+	- Add barcode scanner:
+		window.scanner.run(pm, data => {
+			console.log("Code type ", data.format, "found:", data.code);
+		});
+
 

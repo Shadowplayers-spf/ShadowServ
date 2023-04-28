@@ -11,6 +11,7 @@ export default class PageManager{
         this.errIndex = 0;
         this.user = new User();
         this.back = null;
+        this.onModalClose = null;
 
     }
 
@@ -168,12 +169,14 @@ export default class PageManager{
 
     }
 
-    setModal( divs, padding = true ){
+    setModal( divs, padding = true, overflow = true, onClose = null ){
         
         const modal = document.getElementById("modal");
 
         if( !divs ){
             modal.classList.toggle('hidden', true);
+            if( typeof this.onModalClose === "function" )
+                this.onModalClose();
             return;
         }
 
@@ -188,13 +191,14 @@ export default class PageManager{
 
         });
         
-
         const contentDiv = modal.querySelector("div.wrap > div.content");
         contentDiv.classList.toggle("noPadding", !padding);
+        contentDiv.classList.toggle("hiddenOverflow", !overflow);
         contentDiv.replaceChildren(...divs);
         modal.classList.toggle('hidden', false);
         modal.onclick = this.clearModal.bind(this);
         contentDiv.onclick = event => {event.stopImmediatePropagation();};
+        this.onModalClose = onClose;
 
         this.autoBind(contentDiv);
 
