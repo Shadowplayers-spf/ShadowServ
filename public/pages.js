@@ -153,11 +153,13 @@ pm.addPage(
                 return;
 
             const bg = this.make("div", "", ["shopBg"]);
-            // Todo: Image
+            bg.style.backgroundImage = "url('"+prod.getImage()+"')";
 
             const info = this.make("div", "", ["shopItemData"]);
             this.make('h2', prod.name, [], info);
             this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], info);
+            if( prod.age_restriction )
+                this.make('p', "+"+prod.age_restriction+" år", ["subtitle", "restricted"], info);
             this.make('p', prod.description, ['desc'], info);
             
             if( user.isAdmin() ){
@@ -313,7 +315,12 @@ pm.addPage(
         this._inputs.description.innerText = product.description;
         this._inputs.active.checked = Boolean(product.active);
         
-        // Todo: Barcode scanner
+        this._inputs.scanBarcode.onclick = event => {
+            scanner.run(pm, data => {
+                this._inputs.barcode.value = data.code;
+                console.log(data);
+            });
+        };
 
         // Handle submit
         this._form.onsubmit = async event => {

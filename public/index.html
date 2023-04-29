@@ -77,7 +77,10 @@
 					Namn<br />
 					<input type="text" name="name" required />
 					Streckkod<br />
-					<input type="text" name="barcode" required />
+					<div class="formFlex">
+						<input type="text" name="barcode" required />
+						<input type="button" class="scanBarcode" value="Scanna" name="scanBarcode" />
+					</div>
 					<label>Aktiv <input type="checkbox" name="active" /></label><br />
 					Lagersaldo<br />
 					<input type="number" name="stock" />

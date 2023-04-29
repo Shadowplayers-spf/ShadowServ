@@ -1,10 +1,8 @@
 Frontend:
 - Shop user front end
 	- Improve modal
-- Shop admin editor
-	- Add barcode scanner:
-		window.scanner.run(pm, data => {
-			console.log("Code type ", data.format, "found:", data.code);
-		});
+- Swish
 
 
+- Allergiinformation i Beskrivning
+- 

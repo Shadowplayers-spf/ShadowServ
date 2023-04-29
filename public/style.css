@@ -2,7 +2,7 @@
     :root {
         --color-cyberpunk: #F66;
         --font-cyberpunk: 'Cyberway Riders';
-        --shadow-default: 0.25vmax 0.25vmax 1vmax #000;
+        --shadow-default: 0.25vmax 0.25vmax 0.5vmax #000;
         --radius-default: 1vmax;
         --background-black-default:rgba(10,10,10,0.75);
         --background-white-default:rgba(240,240,240,.75);
@@ -443,13 +443,31 @@
     }
     div.shopItemData{
         overflow:auto;
-        background:var(--background-black-default);
-        border-radius: var(--radius-default);
+        background:rgba(255,255,255,.75);
+        border-top-right-radius: var(--radius-default);
         padding: var(--modal-content-padding);
+        backdrop-filter: blur(5px);
     }
     
     div.shopItemData > h2, div.shopItemData > p{
         margin: 0 0 1vmax 0;
+    }
+    div.shopItemData > p.cost,
+    div.shopItemData > p.restricted
+    {
+        background: #161;
+        padding:1vmax;
+        display: inline-block;
+        border-radius: var(--radius-default);
+        border: var(--border-default);
+        border-color: var(--color-bright-green);
+    }
+    div.shopItemData > p.restricted{
+        background: #611;
+        border-color: var(--color-bright-red);
+    }
+    div.shopItemData > p.desc{
+        color:#611;
     }
     
     
@@ -460,7 +478,7 @@
 /* Page: Store edit */
 
     #page-storeEdit{
-        padding:2vmax;
+        padding:2vmax 2vmax 10vmax 2vmax;
     }
     #page-storeEdit input,
     #page-storeEdit select,
@@ -472,6 +490,10 @@
         width:100%;
         display:inline-block;
         box-sizing: border-box;
+    }
+
+    #page-storeEdit div.formFlex{
+        display:flex;
     }
 
 
