@@ -72,6 +72,19 @@ export class ShopItem extends DB{
 
     }
 
+    async addStock( amount = 0 ){
+
+        amount = Math.trunc(amount);
+        if( this.stock + amount < 0 )
+            amount = -this.stock;
+
+        if( amount )
+            await this.query("UPDATE "+this.constructor.table+" SET stock=stock+? WHERE id=?", [
+                amount, this.id
+            ]);
+
+    }
+
     // Saves changes or inserts a new one if this.id = 0
     async saveOrInsert(){
 

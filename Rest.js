@@ -325,6 +325,21 @@ export default class Rest{
 
     }
 
+    /*
+        Adds or subtracts from stock of an item by id
+    */
+    async admAddStock( id, amount = 1 ){
+        id = Math.trunc(id);
+
+        const item = await ShopItem.get(id);
+        if( !item )
+            throw new Error("Item not found");
+
+        await item.addStock(amount);
+        return true;
+
+    }
+
 
 }
 

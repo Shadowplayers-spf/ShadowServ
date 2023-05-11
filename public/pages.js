@@ -156,18 +156,51 @@ pm.addPage(
             bg.style.backgroundImage = "url('"+prod.getImage()+"')";
 
             const info = this.make("div", "", ["shopItemData"]);
+            
             this.make('h2', prod.name, [], info);
+            
             this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], info);
             if( prod.age_restriction )
                 this.make('p', "+"+prod.age_restriction+" år", ["subtitle", "restricted"], info);
-            this.make('p', prod.description, ['desc'], info);
             
+            this.make('p', prod.stock+' i lager', ['subtitle', (prod.stock > 0 ? 'cost' : 'restricted')], info);
+
+            this.make('p', prod.description, ['desc',], info);
+
+            this.make('p', 'Använd "Scanna Streckkod" på förstasidan för att handla denna produkten!', ['footnote'], info);
+            
+            // Admin functions
             if( user.isAdmin() ){
                 
-                const button = this.make("input", "", [], info);
+                const form = this.make("form", "", ["admEdit"], info);
+                
+                const restock = this.make("input", "", ["restock"], form);
+                restock.type = "number";
+                restock.step = 1;
+                restock.style.width = "8vmax";
+                restock.value = Math.trunc(localStorage['admShopItem_'+id]) || 10;
+                
+                const submit = this.make("input", "", [], form);
+                submit.type = "submit";
+                submit.value = "Fyll På";
+
+                restock.style.display = submit.style.display = 'inline-block';
+
+                const button = this.make("input", "", [], form);
                 button.value = "Redigera";
                 button.type = "button";
                 button.dataset.href = "storeEdit/"+String(id);
+
+                form.onsubmit = async event => {
+                    event.preventDefault();
+                    
+                    const amt = Math.trunc(restock.value);
+                    await pm.restReq("AddStock", [id, amt]);
+                    pm.setPage('store');
+
+                    localStorage['admShopItem_'+id] = amt;
+
+                };
 
             }
 
@@ -181,6 +214,8 @@ pm.addPage(
         
         const dom = this.getDom();
         const products = this.data.get("products");
+        const user = this.parent.user;
+
         
         const divProducts = dom.querySelector("div.products");
         const prods = [];
@@ -226,7 +261,9 @@ pm.addPage(
             const stockClasses = ['stock'];
             if( !product.stock )
                 stockClasses.push('out');
-            this.make('span', ", "+product.stock+" stk", stockClasses, costRow);
+
+            if( !product.stock || user.isAdmin() )
+                this.make('span', ", "+(product.stock ? product.stock+" stk" : 'Slutsåld'), stockClasses, costRow);
 
             div.onclick = this._onProductClick;
             

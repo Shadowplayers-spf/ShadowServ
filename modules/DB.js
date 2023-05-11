@@ -37,9 +37,16 @@ export default class DB{
         }
     }
 
+    exists(){
+        return this.id > 0;
+    }
+
     static async get( fields = {}, limit = false ){
-        if( !isNaN(fields) )
+        
+        if( !isNaN(fields) ){
             fields = {id : fields};
+            limit = 1;
+        }
 
         if( !this.table )
             throw 'No table definition for '+this.name;

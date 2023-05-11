@@ -3,6 +3,7 @@
         --color-cyberpunk: #F66;
         --font-cyberpunk: 'Cyberway Riders';
         --shadow-default: 0.25vmax 0.25vmax 0.5vmax #000;
+        --shadow-text-default: 0.05vmax 0.05vmax 0.25vmax #000;
         --radius-default: 1vmax;
         --background-black-default:rgba(10,10,10,0.75);
         --background-white-default:rgba(240,240,240,.75);
@@ -18,6 +19,7 @@
         --font-size-default: 2vmax;
         --color-bright-green: #AFA;
         --color-bright-red: #FAA;
+        --color-dark-red: #611;
         
     }
 
@@ -33,17 +35,17 @@
     h1{
         color:var(--color-cyberpunk);
         font-size:6vmax;
-        text-shadow: var(--shadow-default);
+        text-shadow: var(--shadow-text-default);
     }
     h2{
         font-size:4vmax;
         color:var(--color-cyberpunk);
-        text-shadow: var(--shadow-default);
+        text-shadow: var(--shadow-text-default);
     }
     h3{
         font-size:3vmax;
         color:var(--color-cyberpunk);
-        text-shadow: var(--shadow-default);
+        text-shadow: var(--shadow-text-default);
     }
 
     body{
@@ -77,6 +79,9 @@
     p.subtitle{
         margin-top: -0.5vmax;
         margin-left: 0.5vmax;
+    }
+    *.floatRight{
+        float:right;
     }
 
     /* Forms */
@@ -270,7 +275,7 @@
         padding:var(--modal-content-padding);
         overflow:auto;
         top:0; bottom:0; left:0; right:0;
-        font-size:3vmax;
+        font-size:2.5vmax;
     }
     #modal > div.wrap > div.content.noPadding{
         padding:0;
@@ -332,6 +337,13 @@
         height:6vmax;
         filter: sepia(93%) brightness(50%) saturate(1000%) hue-rotate(-20deg);
     }
+    #page-user div.sections div.section.barcode{
+        color:#030;
+        background: linear-gradient(to bottom, rgba(253,211,213,1) 0%,rgba(255,85,91,1) 98%);
+    }
+    #page-user div.sections div.section.barcode > img{
+        filter: sepia(93%) brightness(50%) saturate(1000%) hue-rotate(300deg);
+    }
     #page-user div.sections div.section.assets{
         color:#303;
         background: linear-gradient(to bottom, rgba(243,228,254,1) 0%,rgba(212,151,255,1) 98%);
@@ -385,6 +397,7 @@
         flex:48%;
         overflow:hidden;
         box-sizing: border-box;
+        max-width:49%;
     }
     #page-store div.products > div.product.outOfStock{
         border-color: var(--color-bright-red);
@@ -439,7 +452,9 @@
     div.shopBg{
         background-size: cover;
         position: absolute;
-        left:0; top:0; right:0; bottom:0;
+        left:0; top:0; bottom:0;
+        width:20vw;
+        
     }
     div.shopItemData{
         overflow:auto;
@@ -447,6 +462,7 @@
         border-top-right-radius: var(--radius-default);
         padding: var(--modal-content-padding);
         backdrop-filter: blur(5px);
+        margin-left: 20vw;
     }
     
     div.shopItemData > h2, div.shopItemData > p{
@@ -457,19 +473,32 @@
     {
         background: #161;
         padding:1vmax;
+        margin-right:1vmax;
         display: inline-block;
         border-radius: var(--radius-default);
         border: var(--border-default);
         border-color: var(--color-bright-green);
     }
     div.shopItemData > p.restricted{
-        background: #611;
+        background: var(--color-dark-red);
         border-color: var(--color-bright-red);
     }
     div.shopItemData > p.desc{
-        color:#611;
+        color:var(--color-dark-red);
+        display: block;
+        background: var(--white-default);
+        padding:2vmax;
+        box-shadow: var(--shadow-default);
+        border-radius: var(--radius-default);
     }
-    
+    div.shopItemData > p.footnote{
+        font-size:1.5vmax;
+        color:var(--color-dark-red);
+        font-style: italic;
+        opacity: 0.75;
+        display: block;
+        padding: 1vmax;
+    }
     
 
 /**/
