@@ -18,8 +18,10 @@
         --background-black-active: rgba(50,50,50,0.75);
         --font-size-default: 2vmax;
         --color-bright-green: #AFA;
+        --color-dark-green: #363;
         --color-bright-red: #FAA;
         --color-dark-red: #611;
+        --color-noticebox-green: rgba(200,255,200,0.75);
         
     }
 
@@ -41,11 +43,13 @@
         font-size:4vmax;
         color:var(--color-cyberpunk);
         text-shadow: var(--shadow-text-default);
+        border-bottom: 1px solid var(--color-cyberpunk);
     }
     h3{
         font-size:3vmax;
         color:var(--color-cyberpunk);
         text-shadow: var(--shadow-text-default);
+        
     }
 
     body{
@@ -83,6 +87,9 @@
     *.floatRight{
         float:right;
     }
+    *.center{
+        text-align: center;
+    }
 
     /* Forms */
     input, select, textarea{
@@ -97,9 +104,10 @@
         color:var(--white-default);
         font-size:var(--font-size-default);
     }
-
-    input[type=submit],input[type=button]{
+    input[type=submit]:not(.defaultFont),input[type=button]:not(.defaultFont){
         font-family: var(--font-cyberpunk);
+    }
+    input[type=submit],input[type=button]{
         color: var(--color-cyberpunk);
     }
     input[type=submit]:active,input[type=button]:active{
@@ -177,9 +185,7 @@
         position: fixed;
         left:0; right:0;
         top:0; bottom:0;
-    }
-    body > div.content > div.page{
-        padding-bottom:10vmax;
+        padding:2vmax 2vmax 10vmax 2vmax;
         overflow: auto;
     }
 /**/
@@ -312,9 +318,6 @@
 
 
 /* Page: User */
-    #page-user{
-        padding:3vmin 6vmin;
-    }
     #page-user div.sections div.section{
         padding:1vmax;
         border-top-right-radius: var(--radius-default);
@@ -370,11 +373,6 @@
 
 
 /* Page: Store */
-    #page-store{
-        padding-left:2vmax;
-        padding-right:2vmax;
-        padding-top:2vmax;
-    }
     #page-store div.products{
         margin-bottom:2vmax;
         display:flex;
@@ -525,6 +523,44 @@
         display:flex;
     }
 
+
+
+/**/
+
+
+/* Page: Credits */
+
+    #page-credits input.defaultFont{
+        margin:1.5vmax;
+    }
+    #page-credits input{
+        display:inline-block;
+        box-sizing: border-box;
+        font-size:3vmax;
+    }
+    #page-credits > form{
+        text-align: center;
+    }
+    #page-credits > p.big{
+        color: var(--color-dark-green);
+        background: var(--color-noticebox-green);
+        font-size: 3vmax;
+        padding:2vmax;
+        
+        border-top-right-radius: var(--radius-default);
+        border: 1px solid var(--color-dark-green);
+    }
+    #page-credits > p.big > span.available{
+        font-weight: bold;
+    }
+    #page-credits > p.big > img.note{
+        position: absolute;
+        top:50%; left:0.5vmax;
+        transform:translateY(-50%);
+        opacity: 0.5;
+        width:7vmax; height:7vmax;
+    }
+    
 
 
 /**/

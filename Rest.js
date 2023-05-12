@@ -137,10 +137,11 @@ export default class Rest{
 
     }
 
+    // Amount is in SEK
     async pvtCreateSwishTransaction( amount, phone ){
 
         const uuid = await Swish.createInvoice(this.user.id, phone, amount); // True = live
-        await SwishTransaction.create(this.user, uuid);
+        await SwishTransaction.create(this.user, uuid, amount);
         
         return true;
 
@@ -237,6 +238,9 @@ export default class Rest{
             ],
             items : [
                 ShopItem1,2,3... Note: Includes inactive.
+            ],
+            swish : [
+                swishtransactions...
             ]
         }
     */
@@ -254,13 +258,17 @@ export default class Rest{
         const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
         const purchaseItems = boughtItems.map(el => el.getOut());
 
+        const swish = await SwishTransaction.getPaidByUser(this.user);
+
         return {
             purchases : purchaseData,
-            boughtItems : purchaseItems
+            boughtItems : purchaseItems,
+            swishTransactions : swish.map(el => el.getOut())
         };
 
 
     }
+
 
 
 

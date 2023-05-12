@@ -110,6 +110,92 @@ pm.addPage(
     }
 );
 
+
+
+pm.addPage(
+    "credits",     // id
+    true,       // Private
+    // onLoad
+    async function(){
+        
+        let history = await pm.restReq("GetPurchaseHistory");
+        this.data.set("history", history);
+        console.log("Purchase history", history);
+
+    },
+    // onBuild
+    async function(){
+        
+        const user = pm.user,
+            dom = this.getDom(),
+            admin = user.isAdmin(),
+            purchaseForm = document.getElementById("purchaseCredit"),
+            purchaseAmount = purchaseForm.querySelector("input.purchase"),
+            availableSpan = dom.querySelector("span.available"),
+            purchaseHistory = dom.querySelector("div.history.purchase"),
+            swishHistory = dom.querySelector("div.history.swish"),
+            amountPresets = purchaseForm.querySelectorAll("input[data-sum]"),
+            history = this.data.get("history")
+        ;
+
+
+        // Bind preset buttons
+        const onPresetClick = event => {
+            purchaseAmount.value = event.currentTarget.dataset.sum;
+        };
+        amountPresets.forEach(el => el.onclick = onPresetClick);
+        
+        // Update sum
+        availableSpan.innerText = Math.trunc(user.shop_credit/100);
+
+        // Bind purchase form
+        purchaseForm.onclick = event => {
+            event.preventDefault();
+            
+            // Todo: Request swish transaction
+
+        };
+
+        /*
+            Todo:
+            - Stylize date
+            - Stylize each entry
+            - Add picture to purchase history
+        */
+        
+        // Swish history
+        for( let swish of history.swishTransactions )
+            this.make("div", swish.amount+"kr | "+swish.updated, ["transaction"], swishHistory);
+
+        // Get a shop item
+        const getShopItem = id => {
+            for( let itm of history.boughtItems ){
+                if( id === itm.id )
+                    return itm;
+            }
+        };
+        for( let bought of history.purchases ){
+
+            const item = getShopItem(bought.item) || {name:'???'};
+
+            const tx = this.make("div", "", ["transaction"], purchaseHistory);
+
+            this.make("p", item.name, ["title"], tx);
+            this.make("p", (bought.amountPaid/100)+"kr | "+bought.created, ["subtitle"], tx);
+
+        }
+
+        
+
+        
+
+    },
+    // onUnload
+    async function(){
+
+    }
+);
+
 pm.addPage(
     "store",     // id
     true,       // Private
@@ -143,7 +229,6 @@ pm.addPage(
             }
         };
 
-        // Todo: Improve modal
         this._onProductClick = event => {
             
             const user = this.parent.user;
@@ -167,7 +252,7 @@ pm.addPage(
 
             this.make('p', prod.description, ['desc',], info);
 
-            this.make('p', 'Använd "Scanna Streckkod" på förstasidan för att handla denna produkten!', ['footnote'], info);
+            this.make('p', 'Använd "Scanna Streckkod" på förstasidan för att köpa denna produkten!', ['footnote'], info);
             
             // Admin functions
             if( user.isAdmin() ){

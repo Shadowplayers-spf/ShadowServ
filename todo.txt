@@ -1,8 +1,38 @@
 Frontend:
-- Shop user front end
-	- Improve modal
-- Swish
+- Barcode scanner (front page)
+	- Click button, open scanner
+	- When it senses a barcode, scan for it in the shop and in our games.
+	- If product:
+		- Check if you have enough money. If you do, confirm purchase.
+		- Add a visual on success?
+	- Else if asset:
+		- Go to its asset page.
+	- Else:
+		- Add error message and ask to try again.
 
+- Games listing:
+	- List all games
+	- Have a search
+		- Filter by name
+		- Filter by active (admin)
+		- Filter by not rented
+	- Admin edit in modal.
 
-- Allergiinformation i Beskrivning
-- 
+- Games editing:
+	- Add fields
+
+- User mangement:
+	- Search users
+	- Add edit form
+
+- Money page:
+	- Add purchase form on top. Enter amount of SEK to buy (with hotbuttons).
+	- Submitting form creates a SWISH request.
+	- Add a refresh button you can click in the purchase modal.
+	- Add a refresh button to the top of page form.
+	- Auto refresh SWISH when logging in.
+	- Add transaction history for the last year.
+
+- Offline/App:
+	- Add webmanifest.
+

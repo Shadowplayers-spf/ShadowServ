@@ -49,7 +49,7 @@
 						<img src="media/crown-coin.svg" />
 						<span class="credit">loading...</span>
 					</div>
-					<div class="section barcode" data-href="credits">
+					<div class="section barcode">
 						<img src="media/smartphone.svg" />
 						<span class="credit">Scanna Streckkod</span>
 					</div>
@@ -66,6 +66,25 @@
 						[A] Användare
 					</div>
 				</div>
+			</div>
+
+			<!-- Shop credit page -->
+			<div id="page-credits" class="page hidden">
+				<form id="purchaseCredit">
+					<input type="number" class="purchase" placeholder="Summa i kr" step="1" min="10" style="width:20vmax" />
+					<input type="submit" value="Köp Kioskkredit" /><br />
+					<input type="button" class="defaultFont" value="50 kr" data-sum="50" />
+					<input type="button" class="defaultFont" value="100 kr" data-sum="100" />
+					<input type="button" class="defaultFont" value="300 kr" data-sum="300" />
+				</form>
+				<p class="center big">
+					<span class="available">...</span> kr
+					<img class="note" src="media/wallet.svg" />
+				</p>
+				<h2>Swish-historik</h2>
+				<div class="history swish"></div>
+				<h2>Köphistorik</h2>
+				<div class="history purchase"></div>
 			</div>
 
 			<!-- Shop page -->

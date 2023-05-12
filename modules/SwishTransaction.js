@@ -16,11 +16,25 @@ export default class SwishTransaction extends DB{
 
 		this.user = 0;
 		this.uuid = '';
+		this.amount = 0; // Hela kr
 		this.status = SwishTransaction.STATUS_PENDING;
 
 		this.load(...arguments);
 
     }
+
+	getOut( full = false ){
+
+		const out = {
+			id : this.id,
+			created : this.created,
+			updated : this.updated,
+			amount : this.amount
+		};
+
+		return out;
+
+	}
 
 	// Refreshes from Swish API. If this was just paid, it returns the amount paid in SEK. Optionally accepts a mysql connection with a begun transaction to make sure everything else works.
 	async refresh( transaction ){
@@ -46,8 +60,9 @@ export default class SwishTransaction extends DB{
 
 
 
-	static async create( user, uuid ){
+	static async create( user, uuid, amount ){
 
+		amount = Math.trunc(amount);
 		if( user instanceof User )
 			user = user.id;
 		user = Math.trunc(user);
@@ -59,10 +74,11 @@ export default class SwishTransaction extends DB{
 
 		let out = new this({
 			user,
-			uuid
+			uuid,
+			amount
 		});
 
-        const q = await this.query("INSERT INTO "+this.table+" (user, uuid, status) VALUES (?,?,?)", [user, uuid, out.status]);
+        const q = await this.query("INSERT INTO "+this.table+" (user, uuid, status, amount) VALUES (?,?,?,?)", [user, uuid, out.status, amount]);
 		out.id = q.insertId;
 
 		return out;
@@ -85,6 +101,22 @@ export default class SwishTransaction extends DB{
 
 	}
 
+	// Returns all transactions by a user in the past year
+    static async getPaidByUser( user ){
+
+        if( user instanceof User )
+            user = user.id;
+        user = Math.trunc(user);
+        if( !user )
+            throw new Error("Invalid user");
+
+        const q = await this.query(
+            "SELECT * FROM "+this.table+" WHERE user=? AND created > DATE_SUB(NOW(), INTERVAL 1 YEAR) ORDER BY created DESC",
+            [user]
+        );
+        return q.map(el => new this(el));
+
+    }
 	
 
 }
