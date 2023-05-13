@@ -279,6 +279,15 @@ export class Page{
         return document.querySelector("#page-"+this.id);
     }
 
+    formatDate( mysqlTimestamp ){
+
+        const d = new Date(mysqlTimestamp).toISOString().split("T");
+        let out = d.shift();
+        out += " "+d.shift().split(".").shift();
+        return out;
+
+    }
+
     // Nonstatic version of make
     make(...args){return this.constructor.make(...args);}
     setModal(...args){return this.parent.setModal(...args);}

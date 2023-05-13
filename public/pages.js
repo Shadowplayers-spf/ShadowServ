@@ -120,7 +120,23 @@ pm.addPage(
         
         let history = await pm.restReq("GetPurchaseHistory");
         this.data.set("history", history);
-        console.log("Purchase history", history);
+        
+        const usr = await pm.restReq("RefreshTransactions", []);
+        pm.user.shop_credit = usr.shop_credit;
+
+        // Refresh pending transactions
+        this._refresh = async () => {
+            
+            const ud = await pm.restReq("RefreshTransactions", []);
+            let pre = pm.user.shop_credit;
+            if( ud.shop_credit !== pre ){
+                pm.setPage("credits");
+                return true;
+            }
+            return false;
+            
+        };
+        
 
     },
     // onBuild
@@ -129,44 +145,122 @@ pm.addPage(
         const user = pm.user,
             dom = this.getDom(),
             admin = user.isAdmin(),
-            purchaseForm = document.getElementById("purchaseCredit"),
-            purchaseAmount = purchaseForm.querySelector("input.purchase"),
-            availableSpan = dom.querySelector("span.available"),
+            wallet = dom.querySelector("div.wallet"),
+            availableSpan = wallet.querySelector("span.available"),
             purchaseHistory = dom.querySelector("div.history.purchase"),
             swishHistory = dom.querySelector("div.history.swish"),
-            amountPresets = purchaseForm.querySelectorAll("input[data-sum]"),
+            purchaseButton = dom.querySelector("div.section.swish"),
             history = this.data.get("history")
         ;
+        
 
+        wallet.onclick = async event => {
 
-        // Bind preset buttons
-        const onPresetClick = event => {
-            purchaseAmount.value = event.currentTarget.dataset.sum;
+            availableSpan.innerText = "...uppdaterar...";
+            const att = await this._refresh();
+            if( !att ){
+                availableSpan.innerText = Math.trunc(user.shop_credit/100);
+            }
         };
-        amountPresets.forEach(el => el.onclick = onPresetClick);
         
         // Update sum
         availableSpan.innerText = Math.trunc(user.shop_credit/100);
-
-        // Bind purchase form
-        purchaseForm.onclick = event => {
+        swishHistory.replaceChildren();
+        purchaseHistory.replaceChildren();
+        
+        // Create purchase form
+        purchaseButton.onclick = event => {
             event.preventDefault();
             
-            // Todo: Request swish transaction
+            
+            // CreateSwishTransaction
+            const form = this.make("form");
+            form.id = "purchaseCredit";
+
+            this.make("p", "Tel.nummer", ["formTitle"], form);
+
+            const phoneInput = this.make("input", "", ["purchase"], form);
+            phoneInput.value = localStorage.phone || "";
+
+            this.make("p", "Kronor att köpa", ["formTitle"], form);
+
+            let input = this.make("input", "", ["purchase"], form);
+            const amountInput = input;
+            input.type = "number";
+            input.step = 1;
+            input.min = 10;
+            input.style.width = "20vmax";
+            input.required = true;
+            input.value = localStorage.swishAmount || 100;
+            
+            this.make("br", "", [], form);
+
+            
+            input = this.make("input", "", [], form);
+            input.type = "submit";
+            input.value = "Köp Kioskkredit";
+            input.required = true;
+
+            this.make("br", "", [], form);
+
+            // Bind preset buttons
+            const onPresetClick = event => {
+                amountInput.value = event.currentTarget.dataset.sum;
+            };
+            
+            this.make("hr", "", [], form);
+    
+            let presets = [50,100,300];
+            for( let v of presets ){
+
+                input = this.make("input", "", ["defaultFont"], form);
+                input.value = v+" kr";
+                input.type = "button";
+                input.dataset.sum = v;
+                input.onclick = onPresetClick;
+
+            }
+
+            this.setModal(form);
+
+            form.onsubmit = async event => {
+                
+                event.preventDefault();
+                const number = phoneInput.value;
+                const amount = amountInput.value;
+                localStorage.phone = number;
+                localStorage.amount = amount;
+
+                if( !await pm.restReq("CreateSwishTransaction", [amount, number]) ){
+                    return;
+                }
+
+                const wrap = this.make("div", "", ["refreshPayment"]);
+                this.make("p", "Öppna swish, tryck på Uppdatera eller tryck på din plånbok längst upp på sidan när betalningen är klar.", [], wrap);
+                const btn = this.make("input", "", [], wrap);
+                btn.value = "Uppdatera";
+                btn.type = "button";
+                
+                btn.onclick = async event => {
+
+                    btn.value = "...uppdaterar.";
+                    if( !await this._refresh() )
+                        btn.value = "Uppdatera";
+
+                };
+
+                this.setModal(wrap);
+
+            };
 
         };
-
-        /*
-            Todo:
-            - Stylize date
-            - Stylize each entry
-            - Add picture to purchase history
-        */
-        
+        		
         // Swish history
-        for( let swish of history.swishTransactions )
-            this.make("div", swish.amount+"kr | "+swish.updated, ["transaction"], swishHistory);
+        for( let swish of history.swishTransactions ){
+            
+            this.make("div", swish.amount+"kr | "+this.formatDate(swish.updated), ["transaction"], swishHistory);
 
+        }
         // Get a shop item
         const getShopItem = id => {
             for( let itm of history.boughtItems ){
@@ -176,24 +270,24 @@ pm.addPage(
         };
         for( let bought of history.purchases ){
 
-            const item = getShopItem(bought.item) || {name:'???'};
+            const item = new ShopItem(getShopItem(bought.item) || {name:'???'});
+
 
             const tx = this.make("div", "", ["transaction"], purchaseHistory);
 
+            const img = this.make("div", "", ["img"], tx);
+            img.style.backgroundImage = "url("+item.getImage()+")";
             this.make("p", item.name, ["title"], tx);
-            this.make("p", (bought.amountPaid/100)+"kr | "+bought.created, ["subtitle"], tx);
+            this.make("p", (bought.amountPaid/100)+"kr | "+this.formatDate(bought.created), ["subtitle"], tx);
 
         }
-
-        
-
-        
 
     },
     // onUnload
     async function(){
 
-    }
+    },
+    "user" // back
 );
 
 pm.addPage(

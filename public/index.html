@@ -70,17 +70,14 @@
 
 			<!-- Shop credit page -->
 			<div id="page-credits" class="page hidden">
-				<form id="purchaseCredit">
-					<input type="number" class="purchase" placeholder="Summa i kr" step="1" min="10" style="width:20vmax" />
-					<input type="submit" value="Köp Kioskkredit" /><br />
-					<input type="button" class="defaultFont" value="50 kr" data-sum="50" />
-					<input type="button" class="defaultFont" value="100 kr" data-sum="100" />
-					<input type="button" class="defaultFont" value="300 kr" data-sum="300" />
-				</form>
-				<p class="center big">
-					<span class="available">...</span> kr
+				<div class="section big wallet">
 					<img class="note" src="media/wallet.svg" />
-				</p>
+					<span class="available">...</span> kr
+				</div>
+				<div class="section swish">
+					<img src="media/crown-coin.svg" />
+					Köp Med Swish
+				</div>
 				<h2>Swish-historik</h2>
 				<div class="history swish"></div>
 				<h2>Köphistorik</h2>

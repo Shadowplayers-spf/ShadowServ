@@ -46,6 +46,7 @@ export default class ShadowServ{
             out.success = false;
             out.response = err.message;
             console.error("Err", err);
+            console.log(err.stack);
         }
 
         // Always unlink files

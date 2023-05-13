@@ -137,8 +137,14 @@ export default class Rest{
 
     }
 
-    // Amount is in SEK
+    /* 
+        Amount is in SEK
+        phone is the phone nr
+        returns true on success
+    */
     async pvtCreateSwishTransaction( amount, phone ){
+
+        amount = Math.trunc(amount);
 
         const uuid = await Swish.createInvoice(this.user.id, phone, amount); // True = live
         await SwishTransaction.create(this.user, uuid, amount);
@@ -154,6 +160,9 @@ export default class Rest{
         try{
 
             const pending = await SwishTransaction.getPendingByUser(this.user);
+            // Nothing to do
+            if( !pending.length )
+                return this.user.getOut(true);
 
             const promises = [];
             for( let tx of pending )
@@ -255,17 +264,21 @@ export default class Rest{
 
         });
 
-        const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
-        const purchaseItems = boughtItems.map(el => el.getOut());
+        let purchaseItems = [];
+        if( items.size ){
+            const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
+            purchaseItems = boughtItems.map(el => el.getOut());
+        }
 
         const swish = await SwishTransaction.getPaidByUser(this.user);
 
-        return {
+        
+        const out = {
             purchases : purchaseData,
             boughtItems : purchaseItems,
             swishTransactions : swish.map(el => el.getOut())
         };
-
+        return out;
 
     }
 

@@ -35,7 +35,7 @@ export default class Swish{
 		Creates a Swish invoice.
 		Returns the transaction UUID if successful.
 	*/
-	static async createInvoice( userID, phone, amount = 10 ){
+	static async createInvoice( userID, phone, amount ){
 
 		userID = String(userID);
 		phone = String(phone);
