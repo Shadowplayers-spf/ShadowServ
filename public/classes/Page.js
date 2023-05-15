@@ -208,6 +208,16 @@ export default class PageManager{
         this.setModal();
     }
 
+    // Fetches user money and updates any elements with the shopCredit class
+    async updateShopCredit(){
+
+        const user = await this.restReq("GetUser");
+        this.user.shop_credit = user.shop_credit;
+        const sek = this.user.getCreditSek();
+        document.querySelectorAll(".shopCredit").forEach(el => el.innerText = sek);
+
+    }
+
 }
 
 export class UserError{

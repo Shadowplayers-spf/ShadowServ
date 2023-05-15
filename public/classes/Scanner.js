@@ -7,6 +7,7 @@ export default class Scanner{
 		this.enabled = false;
 		this.context = null;
 		this.video = null;
+		this.init = false;
 
 	}
 
@@ -55,6 +56,18 @@ export default class Scanner{
 
 	}
 
+	/*
+		Useful data in callback:
+		code : (str)output,
+		format : (str)code_format ex "ean_13"
+	*/
+	onDetected( data ){
+
+		pm.setModal(); // Closes out quagga
+		this._onDetected(data.codeResult);
+
+	}
+
 	async run( pm, onDetected ){
 
 		
@@ -100,15 +113,13 @@ export default class Scanner{
 			Quagga.start();
 		});
 		
-		Quagga.onDetected(data => {
-			pm.setModal(); // Closes out quagga
-			onDetected(data.codeResult);
-			/*
-				Useful data in callback:
-				code : (str)output,
-				format : (str)code_format ex "ean_13"
-			*/
-		});
+		this._onDetected = onDetected;
+		if( !this.init ){
+
+			this.init = true;
+			Quagga.onDetected(this.onDetected.bind(this));
+
+		}
 
 	}
 

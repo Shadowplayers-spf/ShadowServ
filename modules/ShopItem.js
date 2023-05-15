@@ -32,7 +32,6 @@ export class ShopItem extends DB{
         this.load(...arguments);
     }
 
-
     // Returns data to the front end
     getOut( admin = false ){
 

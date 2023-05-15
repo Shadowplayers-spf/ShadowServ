@@ -23,6 +23,7 @@
         --color-bright-red: #FAA;
         --color-dark-red: #611;
         --color-noticebox-green: rgba(200,255,200,0.75);
+        --bg-gradient-green: linear-gradient(to bottom, rgba(229,252,188,1) 0%,rgba(153,248,0,1) 98%);
         
     }
 
@@ -315,6 +316,77 @@
         border-top-right-radius: var(--radius-default);
     }
 
+
+    /* Shop item modal */
+    div.shopBg{
+        background-size: cover;
+        position: absolute;
+        left:0; top:0; bottom:0;
+        width:20vw;
+        
+    }
+    div.shopItemData{
+        overflow:auto;
+        background:rgba(255,255,255,.75);
+        border-top-right-radius: var(--radius-default);
+        padding: var(--modal-content-padding);
+        backdrop-filter: blur(5px);
+        margin-left: 20vw;
+    }
+
+    div.shopItemData div.buyButton > input{
+        background: var(--bg-gradient-green);
+        display:block;
+        color: var(--color-dark-green);
+        font-size:3vmax;
+        width:100%;
+        padding:2vmax;
+    }
+    div.shopItemData div.buyButton{
+        margin:2vmax;
+    }
+
+    
+    div.shopItemData > h2, div.shopItemData > p{
+        margin: 0 0 1vmax 0;
+    }
+    div.shopItemData > p.cost,
+    div.shopItemData > p.restricted
+    {
+        background: #161;
+        padding:1vmax;
+        margin-right:1vmax;
+        display: inline-block;
+        border-radius: var(--radius-default);
+        border: var(--border-default);
+        border-color: var(--color-bright-green);
+    }
+    div.shopItemData > p.restricted{
+        background: var(--color-dark-red);
+        border-color: var(--color-bright-red);
+    }
+    div.shopItemData > p.desc,
+    div.productBought{
+        color:var(--color-dark-red);
+        display: block;
+        background: var(--white-default);
+        padding:2vmax;
+        box-shadow: var(--shadow-default);
+        border-radius: var(--radius-default);
+    }
+    div.shopItemData > p.footnote{
+        font-size:1.5vmax;
+        color:var(--color-dark-red);
+        font-style: italic;
+        opacity: 0.75;
+        display: block;
+        padding: 1vmax;
+    }
+
+    div.productBought{
+        
+    }
+
 /**/
 
 
@@ -329,6 +401,7 @@
         background: linear-gradient(to bottom, rgba(252,234,187,1) 0%,rgba(248,181,0,1) 98%);
         color:#330;
         font-weight: bold;
+        user-select: none;
     }
     div.section:active{
         transform: scale(0.95);
@@ -358,7 +431,7 @@
     div.section.store,
     div.section.wallet{
         color:#030;
-        background: linear-gradient(to bottom, rgba(229,252,188,1) 0%,rgba(153,248,0,1) 98%);
+        background: var(--bg-gradient-green);
     }
     div.section.store > img,
     div.section.wallet > img{
@@ -449,59 +522,7 @@
         background-position: center;
     }
 
-    /* Shop item modal */
-    div.shopBg{
-        background-size: cover;
-        position: absolute;
-        left:0; top:0; bottom:0;
-        width:20vw;
-        
-    }
-    div.shopItemData{
-        overflow:auto;
-        background:rgba(255,255,255,.75);
-        border-top-right-radius: var(--radius-default);
-        padding: var(--modal-content-padding);
-        backdrop-filter: blur(5px);
-        margin-left: 20vw;
-    }
     
-    div.shopItemData > h2, div.shopItemData > p{
-        margin: 0 0 1vmax 0;
-    }
-    div.shopItemData > p.cost,
-    div.shopItemData > p.restricted
-    {
-        background: #161;
-        padding:1vmax;
-        margin-right:1vmax;
-        display: inline-block;
-        border-radius: var(--radius-default);
-        border: var(--border-default);
-        border-color: var(--color-bright-green);
-    }
-    div.shopItemData > p.restricted{
-        background: var(--color-dark-red);
-        border-color: var(--color-bright-red);
-    }
-    div.shopItemData > p.desc{
-        color:var(--color-dark-red);
-        display: block;
-        background: var(--white-default);
-        padding:2vmax;
-        box-shadow: var(--shadow-default);
-        border-radius: var(--radius-default);
-    }
-    div.shopItemData > p.footnote{
-        font-size:1.5vmax;
-        color:var(--color-dark-red);
-        font-style: italic;
-        opacity: 0.75;
-        display: block;
-        padding: 1vmax;
-    }
-    
-
 /**/
 
 

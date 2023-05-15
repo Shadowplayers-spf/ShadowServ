@@ -1,10 +1,12 @@
 import User from "./classes/User.js";
 import PageManager from "./classes/Page.js";
 import ShopItem from "./classes/ShopItem.js";
+import templates from "./templates.js";
 
 const pm = new PageManager();
 export default pm;
 
+// Login
 pm.addPage(
     "login",    // id
     false,      // private
@@ -41,7 +43,7 @@ pm.addPage(
     }
 );
 
-
+// Signup
 pm.addPage(
     "signup",       // id
     false,          // private
@@ -79,12 +81,22 @@ pm.addPage(
     }
 );
 
-
+// User main page
 pm.addPage(
     "user",     // id
     true,       // Private
     // onLoad
     async function(){
+
+        this.buildShopPurchase = shopItem => {
+
+            const wrap = this.make("div");
+            templates.productModal(this, wrap, shopItem);
+
+
+            pm.setModal(wrap, false);
+
+        };
 
     },
     // onBuild
@@ -98,10 +110,28 @@ pm.addPage(
         dom.querySelector("a.logOut").onclick = async () => {
             await pm.restReq("Logout"); 
         };
-        dom.querySelector("div.sections > div.section.credit > span.credit").innerText = user.getCreditSek()+" kr";
+        dom.querySelector("div.sections > div.section.credit > span.credit").innerText = user.getCreditSek();
         dom.querySelector("span.member").classList.toggle("hidden", !user.member);
 
         dom.querySelectorAll("div.sections > div.section.admin").forEach(el => el.classList.toggle("hidden", !admin));
+
+        dom.querySelector("div.barcode").onclick = event => {
+            scanner.run(pm, async data => {
+                
+                const code = data.code;
+                const fetch = await pm.restReq("BarcodeScanned", [code]);
+                
+                const type = fetch.type;
+                let assetData = fetch.data;
+
+                if( type === "ShopItem" )
+                    this.buildShopPurchase(new ShopItem(assetData));
+                else if( type == "Inventory" )
+                    console.log("Todo: Handle inventory");
+
+
+            });
+        };
 
     },
     // onUnload
@@ -331,59 +361,10 @@ pm.addPage(
             if( !prod )
                 return;
 
-            const bg = this.make("div", "", ["shopBg"]);
-            bg.style.backgroundImage = "url('"+prod.getImage()+"')";
+            const wrap = this.make("div");
+            templates.productModal(this, wrap, prod);
 
-            const info = this.make("div", "", ["shopItemData"]);
-            
-            this.make('h2', prod.name, [], info);
-            
-            this.make('p', prod.cost/100+" kr", ['subtitle', 'cost'], info);
-            if( prod.age_restriction )
-                this.make('p', "+"+prod.age_restriction+" år", ["subtitle", "restricted"], info);
-            
-            this.make('p', prod.stock+' i lager', ['subtitle', (prod.stock > 0 ? 'cost' : 'restricted')], info);
-
-            this.make('p', prod.description, ['desc',], info);
-
-            this.make('p', 'Använd "Scanna Streckkod" på förstasidan för att köpa denna produkten!', ['footnote'], info);
-            
-            // Admin functions
-            if( user.isAdmin() ){
-                
-                const form = this.make("form", "", ["admEdit"], info);
-                
-                const restock = this.make("input", "", ["restock"], form);
-                restock.type = "number";
-                restock.step = 1;
-                restock.style.width = "8vmax";
-                restock.value = Math.trunc(localStorage['admShopItem_'+id]) || 10;
-                
-                const submit = this.make("input", "", [], form);
-                submit.type = "submit";
-                submit.value = "Fyll På";
-
-                restock.style.display = submit.style.display = 'inline-block';
-
-                const button = this.make("input", "", [], form);
-                button.value = "Redigera";
-                button.type = "button";
-                button.dataset.href = "storeEdit/"+String(id);
-
-                form.onsubmit = async event => {
-                    event.preventDefault();
-                    
-                    const amt = Math.trunc(restock.value);
-                    await pm.restReq("AddStock", [id, amt]);
-                    pm.setPage('store');
-
-                    localStorage['admShopItem_'+id] = amt;
-
-                };
-
-            }
-
-            pm.setModal([bg, info], false);
+            pm.setModal(wrap, false);
             
         };
 
@@ -534,7 +515,6 @@ pm.addPage(
         this._inputs.scanBarcode.onclick = event => {
             scanner.run(pm, data => {
                 this._inputs.barcode.value = data.code;
-                console.log(data);
             });
         };
 

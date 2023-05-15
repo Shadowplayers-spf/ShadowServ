@@ -4,7 +4,20 @@ import DB from "./DB.js";
 	This is used for games/books we have available on site.
 	See ShopItem for the store.
 */
-class Inventory extends DB{
+export default class Inventory extends DB{
+
+	static table = "inventory";
+
+    // Fields that are accepted as is using the admin REST entrypoint
+    static ADMIN_SETTABLE = [
+        'name', 'description', 'barcode', 'active', 'holder', 'owner', 'loanable', 'type', 'comment', 'language', 'ages', 'complete'
+    ];
+
+	static COMPLETION = {
+		unknown : 0,
+		partial : 1,
+		full : 2
+	};
 
 	constructor(){
 		super(...arguments);
@@ -18,7 +31,9 @@ class Inventory extends DB{
 		this.active = 1;			// When 0, it's something that's no longer available.
 		this.type = 'boardgame';	// Todo: Decide what types of items we should have.
 		this.comment = '';			// Comment for admins only
-		this.image = '';			// URL to image.
+		this.language = 'sv';
+		this.ages = 'alla åldrar';
+		this.complete = this.constructor.COMPLETION.unknown;
 
 		this.load(...arguments);
 	}

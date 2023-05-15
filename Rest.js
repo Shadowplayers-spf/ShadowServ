@@ -5,6 +5,7 @@ import DB from './modules/DB.js';
 import { ShopItem } from './modules/ShopItem.js';
 import ShopTransaction from './modules/ShopTransaction.js';
 import sharp from 'sharp';
+import Inventory from './modules/Inventory.js';
 
 export default class Rest{
 
@@ -203,6 +204,10 @@ export default class Rest{
         
     }
     
+    /*
+        Purchase an item from the shop using shop credit
+        Returns true on success
+    */
     async pvtPurchaseShopItem( itemID ){
         
         itemID = Math.trunc(itemID);
@@ -282,8 +287,38 @@ export default class Rest{
 
     }
 
+    /*
+        Takes a barcode and returns if it exists
+        On success, returns:
+        {
+            type : "ShopItem" / "Inventory",
+            data : (obj)asset_data
+        }
+    */
+    async pvtBarcodeScanned( code ){
+        
+        code = String(code);
+        // First check if a product exists
+        let item = await ShopItem.get({barcode : code}, 1);
+        if( item?.exists() && item.active )
+            return {
+                type : 'ShopItem',
+                data : item.getOut()
+            };
 
 
+        // Then try inventory
+        item = await Inventory.get({barcode : code}, 1);
+        if( item?.exists() && item.active )
+            return {
+                type : 'Inventory',
+                data : item.getOut()
+            };
+            
+        
+        throw new Error("Streckkoden hittades inte. Försök igen!");
+
+    }
 
 
 
