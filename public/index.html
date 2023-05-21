@@ -61,7 +61,7 @@
 						<img src="media/shopping-cart.svg" />
 						Kiosken
 					</div>
-					<div class="section admin users hidden" data-href="users">
+					<div class="section admin users hidden" data-href="userManager">
 						<img src="media/two-shadows.svg" />
 						[A] Användare
 					</div>
@@ -89,7 +89,6 @@
 				<div class="products"></div>
 				<input type="button" value="Ny Produkt" class="newProduct hidden" data-href="storeEdit/0" />
 			</div>
-
 
 			<!-- Shop editor -->
 			<div id="page-storeEdit" class="page hidden">
@@ -119,6 +118,27 @@
 					<input type="submit" value="Spara" />
 				</form>
 			</div>
+
+			<!-- User manager -->
+			<div id="page-userManager" class="page hidden">
+				<form id="userSearch">
+					<input type="text" class="searchText" />
+					<input type="submit" value="Sök" />
+				</form>
+				<table class="users">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Namn</th>
+							<th>Medlem</th>
+							<th>Discord</th>
+							<th>Kredit (SEK)</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
 		</div>
 
 		<div id="back" class="hidden">

@@ -1,15 +1,10 @@
-Frontend:
-- Barcode scanner (front page)
-	- Click button, open scanner
-	- When it senses a barcode, scan for it in the shop and in our games.
-	- If product:
-		- Check if you have enough money. If you do, confirm purchase.
-		- Add a visual on success?
-	- Else if asset:
-		- Go to its asset page.
-	- Else:
-		- Add error message and ask to try again.
-
+- User mangement:
+	- Search users
+	- Add edit form
+		- Can't edit accounts with higher or equal privilege to yours
+		- Need a button to generate a new password, and specific endpoint
+		- 
+	
 - Games listing:
 	- List all games
 	- Have a search
@@ -17,22 +12,19 @@ Frontend:
 		- Filter by active (admin)
 		- Filter by not rented
 	- Admin edit in modal.
+	- Admin "Add new" button
 
 - Games editing:
 	- Add fields
 
-- User mangement:
-	- Search users
-	- Add edit form
-
-- Money page:
-	- Add purchase form on top. Enter amount of SEK to buy (with hotbuttons).
-	- Submitting form creates a SWISH request.
-	- Add a refresh button you can click in the purchase modal.
-	- Add a refresh button to the top of page form.
-	- Auto refresh SWISH when logging in.
-	- Add transaction history for the last year.
-
+- Barcode scanner (front page)
+	- if asset:
+		- Show its inspect modal.
 - Offline/App:
 	- Add webmanifest.
 
+- Backups
+	- ???
+- Hosting
+	- ???
+	

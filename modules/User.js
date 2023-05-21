@@ -170,5 +170,23 @@ export default class User extends DB{
     }
 
 
+    static async getAll( startFrom = 0, limit = 0 ){
+
+        startFrom = Math.trunc(startFrom) || 0;
+        limit = Math.trunc(limit) || 0;
+
+        let lim = '';
+        let vals = [];
+        if( startFrom || limit ){
+            lim = 'LIMIT ?,?';
+            vals = [startFrom, limit];
+        }
+        const q = await this.query("SELECT * FROM "+this.table+" ORDER BY nick ASC "+lim, vals); 
+        if( q )
+            return q.map(el => new this(el));
+
+    }
+
+
 }
 

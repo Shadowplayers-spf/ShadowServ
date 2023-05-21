@@ -444,6 +444,76 @@ pm.addPage(
 
 
 
+pm.addPage(
+    "userManager",     // id
+    true,       // Private
+    // onLoad
+    async function(){
+
+        let users = await pm.restReq("GetUsers");
+        users = users.map(el => new User(el));
+        this.data.set("users", users);
+
+        this._onUserRowClick = event => {
+            
+            const id = Math.trunc(event.currentTarget.dataset.id) || 0;
+            if( !id )
+                return;
+
+            console.log("Todo: Open user editor for ", id);
+
+        };
+        
+    },
+    // onBuild
+    async function(){
+        
+        const dom = this.getDom();
+        const users = this.data.get("users");
+        const user = this.parent.user;
+
+        
+        const tableUsers = dom.querySelector("table.users > tbody");
+        
+        const rows = [];
+        for( let user of users ){
+
+            const tr = this.make("tr");
+            rows.push(tr);
+            tr.dataset.id = user.id;
+            tr.onclick = this._onUserRowClick;
+
+            this.make("td", user.id, [], tr);
+            this.make("td", user.nick, [], tr);
+            this.make("td", user.member, [], tr);
+            this.make("td", user.discord, [], tr);
+            this.make("td", user.shop_credit/100, [], tr);
+            
+        }
+        tableUsers.replaceChildren(...rows);
+
+        const formSearch = document.getElementById("userSearch");
+        const inputSearch = formSearch.querySelector("input.searchText");
+
+        formSearch.onsubmit = event => {
+            event.preventDefault();
+
+            console.log("Todo: Filter users by ", inputSearch.value);
+
+        };
+
+
+    },
+    // onUnload
+    async function(){
+
+    },
+    // Back
+    "user"
+);
+
+
+
 
 pm.addPage(
     "storeEdit",    // id

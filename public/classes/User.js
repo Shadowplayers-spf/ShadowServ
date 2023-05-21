@@ -13,7 +13,8 @@ export default class User extends DbAsset{
         this.updated = "";
         this.session_token = "";
         this.shop_credit = 0;       // Öre
-
+        this.discord = "";
+        
         this.load(data);
     }
 

@@ -396,6 +396,16 @@ export default class Rest{
 
     }
 
+    /*
+        Get a list of users in nick ascending order
+    */
+    async admGetUsers( start = 0, limit = 0 ){
+
+        const users = await User.getAll(start, limit);
+        return users.map(el => el.getOut(true));
+
+    }
+
 
 }
 

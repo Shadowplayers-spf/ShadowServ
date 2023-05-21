@@ -610,3 +610,29 @@
 
 
 /**/
+
+/* User editor */
+    /* Search form */
+    #userSearch{
+        display: flex;
+        width:100%;
+        justify-content: space-between;
+    }
+    #userSearch > input.searchText{
+        width: 100%;
+        margin-right:1vmax;
+    }
+
+    #page-userManager > table.users{
+        width:100%;
+    }
+    
+    #page-userManager > table.users td{
+        border:1px dotted var(--white-default);
+        padding:1vmax;
+    }
+
+
+
+
+/**/
