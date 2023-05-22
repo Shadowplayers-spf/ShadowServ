@@ -623,6 +623,8 @@
         margin-right:1vmax;
     }
 
+
+    /* User table */
     #page-userManager > table.users{
         width:100%;
     }
@@ -632,7 +634,9 @@
         padding:1vmax;
     }
 
-
-
+    /* Edit form */
+    form.userEdit > p{
+        margin-bottom:0;
+    }
 
 /**/

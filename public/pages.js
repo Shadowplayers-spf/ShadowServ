@@ -454,13 +454,91 @@ pm.addPage(
         users = users.map(el => new User(el));
         this.data.set("users", users);
 
+        this._getUserById = (id) => {
+            for( let u of users ){
+                if( u.id === id )
+                    return u;
+            }
+        };
+
         this._onUserRowClick = event => {
             
             const id = Math.trunc(event.currentTarget.dataset.id) || 0;
-            if( !id )
-                return;
+            const user = this._getUserById(id);
+            if( !user )
+                return;         
 
-            console.log("Todo: Open user editor for ", id);
+            const wrap = this.make("div");
+            const form = this.make("form", "", ["userEdit"], wrap);
+
+            this.make("p", "Namn", [], form);
+            let field = this.make("input", "", [], form);
+            field.name = 'nick';
+            field.required = true;
+            field.value = user.nick;
+            
+            let label = this.make("label", "Medlem ", [], form);
+            field = this.make("input", "", [], label);
+            field.type = 'checkbox';
+            field.name = "member";
+            field.checked = Boolean(user.member);
+            
+            this.make("p", "Discord", [], form);
+            field = this.make("input", "", [], form);
+            field.name = "discord";
+            field.value = user.discord;
+            
+            this.make("p", "Kiosk-kredit (öre)", [], form);
+            field = this.make("input", "", [], form);
+            field.name = "shop_credit";
+            field.value = user.shop_credit;
+            field.type = "number";
+            field.step = 1;
+            field.min = 0;
+
+            this.make("p", "Privilegium", [], form);
+            field = this.make("select", "", [], form);
+            field.name = "privilege";
+            let opt = this.make("option", "Normal", [], field);
+            opt.value = 1;
+            opt = this.make("option", "Admin", [], field);
+            opt.value = 10;
+            opt.selected = Boolean(user.isAdmin());
+                
+            
+            const confirm = this.make("input", "", [], form);
+            confirm.value = "Spara";
+            confirm.type = "submit";
+
+            this.make("hr", "", [], form);
+
+            const passReset = this.make("input", "", [], form);
+            passReset.value = "Återställ Lösenord";
+            passReset.type = "button";
+            this.make("hr", "", [], form);
+
+            const del = this.make("input", "", [], form);
+            del.value = "Ta Bort Användare";
+            del.type = "button";
+            
+            pm.setModal(wrap);
+
+            form.onsubmit = event => {
+                event.preventDefault();
+
+                console.log("Todo: Save user settings.");
+
+            };
+
+            passReset.onclick = event => {
+                console.log("Todo: Generate a random password");
+            };
+            
+            del.onclick = event => {
+                if( window.confirm("Är du säker?") ){
+                    console.log("Todo: Delete user");
+                }
+            };
 
         };
         
@@ -482,6 +560,8 @@ pm.addPage(
             rows.push(tr);
             tr.dataset.id = user.id;
             tr.onclick = this._onUserRowClick;
+            tr.dataset._n = user.nick.toLowerCase();    // Cache lowercase datasets to speed searches up
+            tr.dataset._d = user.discord.toLowerCase(); //
 
             this.make("td", user.id, [], tr);
             this.make("td", user.nick, [], tr);
@@ -497,9 +577,15 @@ pm.addPage(
 
         formSearch.onsubmit = event => {
             event.preventDefault();
+            const st = inputSearch.value.toLowerCase().trim();
 
-            console.log("Todo: Filter users by ", inputSearch.value);
-
+            rows.forEach(el => {
+                
+                const visible = !st || el.dataset._n.includes(st) || el.dataset._d.includes(st);
+                el.classList.toggle("hidden", !visible);
+                
+            });
+            
         };
 
 
