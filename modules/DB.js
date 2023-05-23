@@ -60,7 +60,7 @@ export default class DB{
         }
 
         if( keys.length ){
-            query += " WHERE " + keys.join(",");
+            query += " WHERE " + keys.join(" AND ");
         }
         limit = Math.trunc(limit);
         if( limit > 0 )

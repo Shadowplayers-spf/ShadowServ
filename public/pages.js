@@ -107,14 +107,60 @@ pm.addPage(
             admin = user.privilege >= 10
         ;
         dom.querySelector("h1.username").innerText = user.nick;
+        // Log out
         dom.querySelector("a.logOut").onclick = async () => {
             await pm.restReq("Logout"); 
         };
         dom.querySelector("div.sections > div.section.credit > span.credit").innerText = user.getCreditSek();
         dom.querySelector("span.member").classList.toggle("hidden", !user.member);
 
+        // Toggle admin
         dom.querySelectorAll("div.sections > div.section.admin").forEach(el => el.classList.toggle("hidden", !admin));
 
+        // Change password
+        dom.querySelector("a.changePass").onclick = async event => {
+            
+            const wrap = this.make("div", "", ["changePassWrap"]);
+            this.make("h3", "Byt Lösenord", [], wrap);
+            const form = this.make("form", "", ["changePassForm"], wrap);
+            
+            this.make("p", "Nuvarande lösenord", [], form);
+            const current = this.make("input", "", [], form);
+            current.name = "currentPass";
+            current.type = "password";
+
+            this.make("p", "Nytt lösenord", [], form);
+            const new0 = this.make("input", "", [], form);
+            new0.name = "newPass0";
+            new0.type = "password";
+
+            this.make("p", "Repetera", [], form);
+            const new1 = this.make("input", "", [], form);
+            new1.name = "newPass1";
+            new1.type = "password";
+
+            const submit = this.make("input", "", [], form);
+            submit.value = "Spara";
+            submit.type = "submit";
+            
+            pm.setModal(wrap);
+
+            form.onsubmit = async event => {
+                event.preventDefault();
+
+                if( new0.value !== new1.value ){
+                    window.alert("Lösenorden matchar inte.");
+                    return;
+                }
+
+                await pm.restReq("ChangePassword", [current.value, new0.value]);
+                pm.setModal("Lösenordet har uppdaterats");
+
+            };
+            
+        };
+
+        // Barcode scanner
         dom.querySelector("div.barcode").onclick = event => {
             scanner.run(pm, async data => {
                 
@@ -472,36 +518,38 @@ pm.addPage(
             const form = this.make("form", "", ["userEdit"], wrap);
 
             this.make("p", "Namn", [], form);
-            let field = this.make("input", "", [], form);
-            field.name = 'nick';
-            field.required = true;
-            field.value = user.nick;
+            const nick = this.make("input", "", [], form);
+            nick.name = 'nick';
+            nick.required = true;
+            nick.value = user.nick;
             
             let label = this.make("label", "Medlem ", [], form);
-            field = this.make("input", "", [], label);
-            field.type = 'checkbox';
-            field.name = "member";
-            field.checked = Boolean(user.member);
+            const member = this.make("input", "", [], label);
+            member.type = 'checkbox';
+            member.name = "member";
+            member.checked = Boolean(user.member);
             
             this.make("p", "Discord", [], form);
-            field = this.make("input", "", [], form);
-            field.name = "discord";
-            field.value = user.discord;
+            const discord = this.make("input", "", [], form);
+            discord.name = "discord";
+            discord.value = user.discord;
             
             this.make("p", "Kiosk-kredit (öre)", [], form);
-            field = this.make("input", "", [], form);
-            field.name = "shop_credit";
-            field.value = user.shop_credit;
-            field.type = "number";
-            field.step = 1;
-            field.min = 0;
+            const shopCredit = this.make("input", "", [], form);
+            shopCredit.name = "shop_credit";
+            shopCredit.value = user.shop_credit;
+            shopCredit.type = "number";
+            shopCredit.step = 1;
+            shopCredit.min = 0;
 
             this.make("p", "Privilegium", [], form);
-            field = this.make("select", "", [], form);
-            field.name = "privilege";
-            let opt = this.make("option", "Normal", [], field);
+            const privilege = this.make("select", "", [], form);
+            privilege.name = "privilege";
+            if( pm.user.privilege <= 10 )
+                privilege.disabled = true;
+            let opt = this.make("option", "Normal", [], privilege);
             opt.value = 1;
-            opt = this.make("option", "Admin", [], field);
+            opt = this.make("option", "Admin", [], privilege);
             opt.value = 10;
             opt.selected = Boolean(user.isAdmin());
                 
@@ -523,20 +571,42 @@ pm.addPage(
             
             pm.setModal(wrap);
 
-            form.onsubmit = event => {
+            // Save user settings
+            form.onsubmit = async event => {
                 event.preventDefault();
 
-                console.log("Todo: Save user settings.");
+                const uData = {
+                    nick : nick.value,
+                    member : +member.checked,
+                    discord : discord.value,
+                    shop_credit : Math.trunc(shopCredit.value)
+                };
+                if( pm.user.privilege > 10 )
+                    uData.privilege = privilege.value;
+
+                await pm.restReq("SaveUserSettings", [id, uData]);
+
+                pm.setPage("userManager");
+                
 
             };
 
-            passReset.onclick = event => {
-                console.log("Todo: Generate a random password");
+            // Reset password
+            passReset.onclick = async event => {
+                
+                const passwd = await pm.restReq("GenerateUserPassword", [id]);
+                const p = this.make("p", "Nytt lösenord har genererats för "+user.nick+":", ["center"]);
+                const h2 = this.make("h2", passwd.password, ["center"]);
+                pm.setModal([p,h2]);
+
             };
             
-            del.onclick = event => {
+            del.onclick = async event => {
                 if( window.confirm("Är du säker?") ){
-                    console.log("Todo: Delete user");
+                    
+                    await pm.restReq("DeleteUser", [id]);
+                    pm.setPage("userManager");
+
                 }
             };
 

@@ -186,7 +186,7 @@ export default class PageManager{
         divs = divs.map(el => {
 
             if( typeof el === "string" )
-                return this.make('p', el);
+                return Page.make('p', el);
             return el;
 
         });

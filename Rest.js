@@ -138,6 +138,21 @@ export default class Rest{
 
     }
 
+    /*
+        Updates the current user's password. Pre must match the previous password. Post is the new password to be set
+    */
+    async pvtChangePassword( pre, post ){
+
+        const cur = this.user.validatePassword(pre);
+        if( !cur )
+            throw new Error("Nuvarande lösenord stämmer inte");
+        post = this.user.testPasswordSecurity(post); // Throws an error if it doesn't pass
+        await this.user.setNewPassword(post);
+
+        return true;
+
+    }
+
     /* 
         Amount is in SEK
         phone is the phone nr
@@ -323,6 +338,11 @@ export default class Rest{
 
 
 
+
+
+
+
+
     /* Adm: ADMIN REQUIRED */
     /*
         Creates or updates admin a shop item
@@ -403,6 +423,61 @@ export default class Rest{
 
         const users = await User.getAll(start, limit);
         return users.map(el => el.getOut(true));
+
+    }
+
+    /*
+        Save user settings. User must have a lower privilege than the admin
+        Returns the user object after changes have been applied
+    */
+    async admSaveUserSettings( userid, data = {} ){
+
+        const user = await User.get({deleted:0, id:userid}, 1);
+        if( !user || !user.exists() )
+            throw new Error("User not found");
+        if( user.privilege >= this.user.privilege )
+            throw new Error("Can't edit user with equal or higher privilege");
+        
+        await user.modify(this.user, data);
+        
+        return user.getOut();
+        
+    }
+
+    /*
+        Generates a new password for a user. User has to have a lower privilege than the admin
+        Returns: {
+            password : (str)password
+        }
+    */
+    async admGenerateUserPassword( userid ){
+
+        const user = await User.get({deleted:0, id:userid}, 1);
+        if( !user || !user.exists() )
+            throw new Error("User not found");
+        if( user.privilege >= this.user.privilege )
+            throw new Error("Can't edit user with equal or higher privilege");
+
+        const passwd = await user.generateRandomPassword();
+        return {
+            password : passwd
+        };
+
+    }
+
+    /*
+        Deletes a user. User must have a lower privilege than the admin.
+    */
+    async admDeleteUser( userid ){
+
+        const user = await User.get({deleted:0, id:userid}, 1);
+        if( !user || !user.exists() )
+            throw new Error("User not found");
+        if( user.privilege >= this.user.privilege )
+            throw new Error("Can't delete user with equal or higher privilege");
+
+        await user.delete();
+        return true;
 
     }
 

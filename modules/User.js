@@ -51,7 +51,7 @@ export default class User extends DB{
         if( !template?.id )
             return false;
         
-        const validatePass = await Bcrypt.compare(pass, template.password);
+        const validatePass = await template.validatePassword(pass);
         if( validatePass ){
             
             this.load(template);
@@ -102,7 +102,7 @@ export default class User extends DB{
             return false;
 
         // Session is valid 4 weeks 
-        const fetch = await User.query("SELECT * FROM "+User.table+" WHERE session_token=? AND session_token_generated+100800 > UNIX_TIMESTAMP()", [token]);
+        const fetch = await User.query("SELECT * FROM "+User.table+" WHERE NOT deleted AND session_token=? AND session_token_generated+100800 > UNIX_TIMESTAMP()", [token]);
         if( !fetch.length )
             return false;
         this.load(fetch[0]);
@@ -117,18 +117,40 @@ export default class User extends DB{
         return this.privilege >= 10;
     }
 
-    async register( nick, pass, discord ){
-        
+    validateNick( nick ){
         nick = String(nick).trim();
         if( !nick.match(/^[0-9a-z]+$/i) || nick.length < 3 || nick.length > 20 )
             throw new Error("Invalid nick "+nick);
+        return nick;
+    }
 
+    async hashPassword( pass ){
+        return await Bcrypt.hash(pass, 10);
+    }
+
+    // Checks pass against our current password
+    async validatePassword( pass ){
+        return await Bcrypt.compare(pass, this.password);
+    }
+
+    testPasswordSecurity( pass ){
+        
+        pass = String(pass);
         if( pass.length < 6 )
             throw new Error("Pass too short");
+        return pass;
+
+    }
+
+    async register( nick, pass, discord ){
+        
+        nick = this.validateNick(nick);
+
+        pass = this.testPasswordSecurity(pass);
 
         this.discord = String(discord).substring(0,64);
         this.nick = nick;
-        this.password = await Bcrypt.hash(pass, 10);
+        this.password = await this.hashPassword(pass);
         const ex = await User.get({nick}, 1);
         if( ex?.id )
             throw new Error("User already exists");
@@ -144,6 +166,26 @@ export default class User extends DB{
 
     }
 
+    async setNewPassword( pass ){
+        
+        const hash = await this.hashPassword(pass);
+        this.password = hash;
+        await this.query("UPDATE "+this.constructor.table+" SET password=? WHERE id=?", [
+            hash, this.id
+        ]);
+        
+    }
+
+    // Updates password with a random one, and returns the plaintext password
+    async generateRandomPassword(){
+        
+        const bytes = await Crypto.randomBytes(48);
+        const pass = bytes.toString('hex').substring(0,8);
+        await this.setNewPassword(pass);
+        return pass;
+
+    }
+
     async generateToken( save = false ){
 
         const bytes = await Crypto.randomBytes(48);
@@ -156,6 +198,46 @@ export default class User extends DB{
 
     async destroyToken( save = false ){
         await User.query("UPDATE "+User.table+" SET session_token=NULL WHERE id=?", [this.id]);
+    }
+
+    // Called by an admin to change values. Sanity checks included
+    async modify( adminUser, data = {} ){
+
+        if( data.nick )
+            this.nick = this.validateNick(data.nick);
+        
+        if( data.hasOwnProperty("privilege") ){
+            
+            data.privilege = Math.trunc(data.privilege);
+            if( 
+                data.privilege >= adminUser.privilege && 
+                data.privilege !== this.privilege // Ignore error if it remains unchanged
+            ) 
+                throw new Error("Cannot grant a privilege equal to or higher than your own. Use the root account to add new admins.");
+            this.privilege = data.privilege;
+
+        }
+        if( data.hasOwnProperty("member") )
+            this.member = Math.trunc(data.member) || 0;
+        if( data.hasOwnProperty("discord") )
+            this.discord = String(data.discord).trim();
+        if( data.hasOwnProperty("shop_credit") ){
+            
+            data.shop_credit = Math.trunc(data.shop_credit);
+            if( data.shop_credit < 0 )
+                throw new Error("Invalid shop credit");
+            this.shop_credit = data.shop_credit;
+
+        }
+
+        await this.query("UPDATE "+this.constructor.table+" SET nick=?, privilege=?, member=?, discord=?, shop_credit=? WHERE id=?", [
+            this.nick, this.privilege, this.member, this.discord, this.shop_credit, this.id
+        ]);
+        
+    }
+
+    async delete(){
+        await this.query("UPDATE "+this.constructor.table+" SET deleted=1 WHERE id=?", [this.id]);
     }
 
     // extends token
@@ -181,11 +263,12 @@ export default class User extends DB{
             lim = 'LIMIT ?,?';
             vals = [startFrom, limit];
         }
-        const q = await this.query("SELECT * FROM "+this.table+" ORDER BY nick ASC "+lim, vals); 
+        const q = await this.query("SELECT * FROM "+this.table+" WHERE not deleted ORDER BY nick ASC "+lim, vals); 
         if( q )
             return q.map(el => new this(el));
 
     }
+
 
 
 }

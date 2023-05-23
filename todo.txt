@@ -1,9 +1,3 @@
-- User mangement:
-	- Add edit form
-		- Can't edit accounts with higher or equal privilege to yours
-		- Need a button to generate a new password, and specific endpoint
-		- Need a delete button
-	
 - Games listing:
 	- List all games
 	- Have a search

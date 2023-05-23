@@ -447,6 +447,12 @@
     }
 /**/
 
+/* Page:User */
+     /* Change pass form */
+     form.changePassForm > p{
+        margin-bottom:0;
+    }
+/**/
 
 /* Page: Store */
     #page-store div.products{
