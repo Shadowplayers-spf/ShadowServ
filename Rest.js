@@ -336,6 +336,17 @@ export default class Rest{
     }
 
 
+    /*
+        Returns
+        {out : (arr)enabled_Inventory}
+    */
+    async pvtGetAssets(){
+
+        const isAdmin = this.user.isAdmin();
+        const out = await Inventory.getAll(isAdmin);
+        return out.map(el => el.getOut(isAdmin));
+
+    }
 
 
 

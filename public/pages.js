@@ -2,6 +2,7 @@ import User from "./classes/User.js";
 import PageManager from "./classes/Page.js";
 import ShopItem from "./classes/ShopItem.js";
 import templates from "./templates.js";
+import Inventory from "../classes/Inventory.js";
 
 const pm = new PageManager();
 export default pm;
@@ -783,7 +784,70 @@ pm.addPage(
 );
 
 
+pm.addPage(
+    "assets",     // id
+    true,       // Private
+    // onLoad
+    async function(){
 
+        let assets = await pm.restReq("GetAssets");
+        assets = assets.map(el => new Inventory(el));
+        this.data.set("assets", assets);
+
+        this._getAssetById = (id) => {
+            for( let u of assets ){
+                if( u.id === id )
+                    return u;
+            }
+        };
+
+        this._onAssetClick = event => {
+            
+        };
+
+        console.log("Assets", assets);
+        
+    },
+    // onBuild
+    async function(){
+        
+        const dom = this.getDom();
+        const assets = this.data.get("assets");
+        const user = this.parent.user;
+
+        const rows = [];
+        for( let asset of assets ){
+
+            
+        }
+        dom.querySelector("div.assets").replaceChildren(...rows);
+
+        const formSearch = document.getElementById("assetSearch");
+        const inputSearch = formSearch.querySelector("input.searchText");
+
+        formSearch.onsubmit = event => {
+            event.preventDefault();
+
+            const st = inputSearch.value.toLowerCase().trim();
+
+            rows.forEach(el => {
+                
+                const visible = !st || el.dataset._n.includes(st); // Todo: could improve this search
+                el.classList.toggle("hidden", !visible);
+                
+            });
+            
+        };
+
+
+    },
+    // onUnload
+    async function(){
+
+    },
+    // Back
+    "user"
+);
 
 
 

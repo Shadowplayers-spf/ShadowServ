@@ -38,4 +38,19 @@ export default class Inventory extends DB{
 		this.load(...arguments);
 	}
 
+
+	/*
+        Gets a list of all inventory items 
+    */
+	static async getAll( includeInactive = false ){
+
+		const filters = {};
+		if( !includeInactive )
+			filters.active = 1;
+
+		return await this.get(filters);
+
+	}
+
+
 }
