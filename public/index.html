@@ -145,8 +145,50 @@
 				<form id="assetSearch">
 					<input type="text" class="searchText" placeholder="Sök" />
 					<input type="submit" value="Sök" />
+					<input type="button" value="+ Ny" class="newProduct hidden" data-href="assetEdit" />
 				</form>
 				<div class="assets"></div>
+			</div>
+
+			<!-- Games listing editor -->
+			<div id="page-assetEdit" class="page hidden">
+				<form id="assetEdit">
+					Namn<br />
+					<input type="text" name="name" required />
+					Streckkod<br />
+					<div class="formFlex">
+						<input type="text" name="barcode" required />
+						<input type="button" class="scanBarcode" value="Scanna" name="scanBarcode" />
+					</div>
+					Ägare: <span class="owner"></span> <input type="button" class="editOwner" value="Ändra" /><br />
+					Utlånad till: <span class="holder"></span> <input type="button" class="editLoaner" value="Ändra" /><br />
+					<label>Aktiv <input type="checkbox" name="active" /></label><br />
+					<label>Utlåningsbar <input type="checkbox" name="loanable" /></label><br />
+					Bild<br />
+					<input type="file" name="image" accept="image/*" />
+					Åldrar<br />
+					<input type="text" name="ages" />
+					Språk<br />
+					<select name="language">
+						<option value="">Okänd</option>
+						<option value="sv">Svenska</option>
+						<option value="en">Engelska</option>
+					</select>
+					Typ<br />
+					<select name="type"><!-- Generated --></select>
+					Admin-kommentar<br />
+					<input type="text" name="comment" />
+					Helhet<br />
+					<select name="complete">
+						<option value="0">Okänd</option>
+						<option value="1">Många Delar Saknas</option>
+						<option value="2">Några Delar Saknas</option>
+						<option value="3">Hel</option>
+					</select>
+					Beskrivning<br />
+					<textarea name="description"></textarea>
+					<input type="submit" value="Spara" />
+				</form>
 			</div>
 
 		</div>

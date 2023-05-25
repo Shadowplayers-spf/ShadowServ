@@ -2,6 +2,21 @@ import DbAsset from "./DbAsset.js";
 
 export default class Inventory extends DbAsset{
 
+    static TYPES = {
+		boardgame : 'boardgame',
+		book : 'book',
+		electronic_game : 'electronic_game',
+		other : 'other',
+	};
+
+    static COMPLETION = {
+		unknown : 0,
+		partial_heavy : 1,
+		partial_light : 1,
+		full : 2
+	};
+
+    
 
 	constructor(...args){
 		super(...args);
@@ -13,7 +28,7 @@ export default class Inventory extends DbAsset{
 		this.owner = 1;				// Who owns this item? Defaults to clubhouse.
 		this.loanable = 0;			// Whether you can loan this item home or not.
 		this.active = 1;			// When 0, it's something that's no longer available.
-		this.type = 'boardgame';	// Todo: Decide what types of items we should have.
+		this.type = this.constructor.TYPES.boardgame;	// Todo: Decide what types of items we should have.
 		this.comment = '';			// Comment for admins only
 		this.language = 'sv';
 		this.ages = 'alla åldrar';

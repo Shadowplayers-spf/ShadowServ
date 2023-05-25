@@ -814,6 +814,10 @@ pm.addPage(
         const dom = this.getDom();
         const assets = this.data.get("assets");
         const user = this.parent.user;
+        const isAdmin = user.isAdmin();
+        const newProduct = dom.querySelector("input.newProduct");
+
+        newProduct.classList.toggle("hidden", !isAdmin);
 
         const rows = [];
         for( let asset of assets ){
@@ -849,5 +853,121 @@ pm.addPage(
     "user"
 );
 
+pm.addPage(
+    "assetEdit",    // id
+    true,           // Private
+    // onLoad
+    async function(){
+
+        let assets = await pm.restReq("GetAssets");
+        assets = assets.map(el => new Inventory(el));
+        this.data.set("assets", assets);
+
+        this._getAssetById = (id) => {
+            for( let u of assets ){
+                if( u.id === id )
+                    return u;
+            }
+        };
+
+
+        this._form = document.getElementById("assetEdit");
+        this._inputs = {};
+        this._submit = this._form.querySelector('input[type=submit]');
+
+        const all = this._form.querySelectorAll("[name]");
+        for( let el of all )
+            this._inputs[el.name] = el;
+        
+
+    },
+    // onBuild
+    async function( id ){
+        
+        id = Math.trunc(id);
+        // Fields that can be loaded directly by value
+        const autoFields = [
+            "name",
+            "barcode",
+            "ages",
+            "language",
+            "type",
+            "comment",
+            "complete"
+        ];
+
+        
+        let asset = this._getAssetById(id);
+        // Create a new one instead
+        if( !asset ){
+            asset = new Inventory(); 
+            id = 0;
+        }
+        
+
+        // Update the fields
+        const cats = [];
+        for( let i in Inventory.TYPES ){
+            const opt = this.make('option', i);
+            opt.value = i;
+            if( asset.type === i )
+                opt.selected = true;
+            cats.push(opt);
+        }
+        this._inputs.type.replaceChildren(...cats);
+         
+        for( let field of autoFields )
+            this._inputs[field].value = asset[field];
+
+        this._inputs.description.innerText = asset.description;
+        this._inputs.active.checked = Boolean(asset.active);
+        this._inputs.loanable.checked = Boolean(asset.loanable);
+        
+        this._inputs.scanBarcode.onclick = event => {
+            scanner.run(pm, data => {
+                this._inputs.barcode.value = data.code;
+            });
+        };
+
+        // Handle submit
+        this._form.onsubmit = async event => {
+            event.preventDefault();
+
+            const out = new FormData();
+            const jData = {};
+            for( let f of autoFields )
+                jData[f] = this._inputs[f].value;
+
+            jData.type = this._inputs.type.value;
+            jData.description = this._inputs.description.value;
+            jData.active = +this._inputs.active.checked;
+            jData.loanable = +this._inputs.loanable.checked;
+
+            // formdata includes file and args
+            out.append('file', this._inputs.image.files[0]);
+            out.append("args", JSON.stringify([id, jData]));
+
+            console.log("jData ", jData);
+
+            this._submit.value = 'Sparar...';
+            const ret = await pm.restReq("CreateAsset", out);
+            pm.addNotice("Enheten har sparats");
+            if( !id )
+                pm.setPage("assetEdit/"+ret.id);
+            this._submit.value = 'Spara';
+            
+        };
+
+        
+        
+
+    },
+    // onUnload
+    async function(){
+
+    },
+    // Back
+    "assets"
+);
 
 

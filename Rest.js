@@ -413,6 +413,65 @@ export default class Rest{
     }
 
     /*
+        Creates or updates an asset (games etc we offer)
+        id : id of the item to alter. 0 creates a new one
+        data can contain any of the keys defined in Inventory. Name is required if you're creating a new one.
+    */
+    async admCreateAsset( id, data = {} ){
+
+        if( typeof data !== "object" )
+            throw new Error("Data invalid for CreateAsset");
+
+        id = Math.trunc(id);
+        
+        if( !id && !String(data.name).trim() )
+            throw new Error("Ett namn krävs för varje enhet.");
+
+        let cur = new Inventory();
+        // Update an existing one
+        if( id > 0 ){
+            
+            cur = await Inventory.get(id, 1);
+            if( !cur )
+                throw new Error("Enheten hittades inte");
+
+        }
+
+        // Update fields
+        for( let field of Inventory.ADMIN_SETTABLE ){
+            
+            if( data.hasOwnProperty(field) )
+                cur[field] = data[field];
+
+        }
+        await cur.saveOrInsert();
+
+        // Handle image upload after making sure it's inserted
+        if( this.files[0] ){
+            
+            try{
+                await sharp(this.files[0].path)
+                .resize({
+                    width:512,
+                    height:512,
+                    withoutEnlargement : true
+                })
+                .jpeg({
+                    quality : 60
+                })
+                .toFile('public/media/uploads/inventory/'+cur.id+'.jpg');
+                
+            }catch(err){
+                console.error("Unable to upload file", err);
+            }
+
+        }
+
+        return cur.getOut(true);
+
+    }
+
+    /*
         Adds or subtracts from stock of an item by id
     */
     async admAddStock( id, amount = 1 ){

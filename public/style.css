@@ -532,24 +532,26 @@
 /**/
 
 
-/* Page: Store edit */
+/* Page: Store edit / Asset editor */
 
-    #page-storeEdit{
-        padding:2vmax 2vmax 10vmax 2vmax;
-    }
+    #page-assetEdit input,
     #page-storeEdit input,
+    #page-assetEdit select,
     #page-storeEdit select,
+    #page-assetEdit textarea,
     #page-storeEdit textarea{
         font-size:2.5vmax;
     }
     
-    #page-storeEdit textarea{
+    #page-storeEdit textarea,
+    #page-assetEdit textarea{
         width:100%;
         display:inline-block;
         box-sizing: border-box;
     }
 
-    #page-storeEdit div.formFlex{
+    #page-storeEdit div.formFlex,
+    #page-assetEdit div.formFlex{
         display:flex;
     }
 
@@ -628,6 +630,9 @@
     #userSearch > input.searchText,
     #assetSearch > input.searchText{
         width: 100%;
+        margin-right:1vmax;
+    }
+    #assetSearch > input{
         margin-right:1vmax;
     }
 
