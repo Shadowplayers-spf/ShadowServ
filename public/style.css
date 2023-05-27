@@ -711,5 +711,22 @@
     }
 
 
+    /* Modal */
+    div.inventoryAsset > h2{
+        margin:0;
+    }
+    div.inventoryAsset{
+        padding: 14vmax 2vmax 6vmax 2vmax;
+    }
+    div.inventoryAsset > div.bg{
+        position: absolute;
+        height:12vmax;
+        top:0; left:0; right:0;
+        background-size:cover;
+    }
+    div.inventoryAsset p.subtitle{
+        text-transform: capitalize;
+    }
+
 /**/
 

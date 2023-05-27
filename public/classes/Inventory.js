@@ -9,14 +9,19 @@ export default class Inventory extends DbAsset{
 		other : 'other',
 	};
 
+	static TYPES_SE = {
+		boardgame : 'brädspel',
+		book : 'bok',
+		electronic_game : 'elektroniskt spel',
+		other : 'annat',
+	};
+
     static COMPLETION = {
 		unknown : 0,
 		partial_heavy : 1,
 		partial_light : 1,
 		full : 2
 	};
-
-    
 
 	constructor(...args){
 		super(...args);
@@ -35,6 +40,15 @@ export default class Inventory extends DbAsset{
 		this.complete = this.constructor.COMPLETION.unknown;
 		
 		this.load(...args);
+	}
+
+	getLanguageReadable(){
+
+		if( this.language === "sv" ) 
+			return "Svenska";
+		if( this.language === "en" )
+			return "Engelska";
+		return "Okänt Språk";
 	}
 
     getTypeSE(){

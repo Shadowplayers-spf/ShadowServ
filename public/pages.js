@@ -820,9 +820,13 @@ pm.addPage(
             if( !asset )
                 return;
 
-            const div = this.make("div", "", ["asset"]);
+            const div = this.make("div", "", ["inventoryAsset"]);
+
+            const bg = this.make("div", "", ["bg"], div);
+            bg.style.backgroundImage = 'url('+asset.getImage()+')';
             
             this.make("h2", asset.name, [], div);
+            this.make("p", asset.ages + " | " + asset.getLanguageReadable(), ["subtitle"], div);
             this.make("p", asset.description, [], div);
 
             if( this.parent.user.isAdmin() ){
@@ -834,7 +838,7 @@ pm.addPage(
 
             }
 
-            pm.setModal(div);
+            pm.setModal(div, false);
             
         };
 
@@ -856,9 +860,9 @@ pm.addPage(
         const rows = [];
         for( let asset of assets ){
             
-            if( curCat !== asset.type ){
+            if( curCat !== asset.getTypeSE() ){
                 
-                curCat = asset.type;
+                curCat = asset.getTypeSE();
                 const cat = this.make("h2", curCat, ["category"]);
                 rows.push(cat);
 
@@ -873,12 +877,23 @@ pm.addPage(
             const div = this.make("div", "", classes);
             div.dataset.id = asset.id;
             div.dataset._n = asset.name.toLowerCase();
+
             rows.push(div);
+            
             let bg = this.make("div", "", ["bg"], div);
             bg.style.backgroundImage = 'url('+asset.getImage()+')';
             this.make("h3", asset.name, [], div);
+            
+            let subtitle = [];
+            if( asset.language !== "sv" )
+                subtitle.push(asset.getLanguageReadable());
+            if( asset.ages.toLowerCase() !== "alla åldrar" )
+                subtitle.push(asset.ages);
             if( asset.holder )
-                this.make("p", "Utlånad", ["subtitle"], div);
+                subtitle.push("Utlånad");
+
+            if( subtitle.length )
+                this.make("p", subtitle.join(" | "), ["subtitle"], div);
 
             div.onclick = this._onAssetClick;
 
