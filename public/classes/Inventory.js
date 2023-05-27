@@ -44,7 +44,7 @@ export default class Inventory extends DbAsset{
     }
     
     getImage(){
-        return '/media/uploads/shop/'+this.id+".jpg";
+        return '/media/uploads/inventory/'+this.id+".jpg";
     }
 
 	rebase(){}

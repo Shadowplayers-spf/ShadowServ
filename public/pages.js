@@ -792,6 +792,18 @@ pm.addPage(
 
         let assets = await pm.restReq("GetAssets");
         assets = assets.map(el => new Inventory(el));
+        assets.sort((a,b) => {
+            
+            if( a.type !== b.type )
+                return a.type < b.type ? -1 : 1;
+            if( a.active !== b.active )
+                return a.active ? -1 : 1;
+            if( Boolean(a.holder) !== Boolean(b.holder) )
+                return a.holder ? 1 : -1;
+            
+            return a.name < b.name ? -1 : 1;
+
+        });
         this.data.set("assets", assets);
 
         this._getAssetById = (id) => {
@@ -840,9 +852,18 @@ pm.addPage(
 
         newProduct.classList.toggle("hidden", !isAdmin);
 
+        let curCat;
         const rows = [];
         for( let asset of assets ){
             
+            if( curCat !== asset.type ){
+                
+                curCat = asset.type;
+                const cat = this.make("h2", curCat, ["category"]);
+                rows.push(cat);
+
+            }
+
             const classes = ["asset"];
             if( asset.holder > 1 )
                 classes.push("loaned");
@@ -851,10 +872,14 @@ pm.addPage(
 
             const div = this.make("div", "", classes);
             div.dataset.id = asset.id;
+            div.dataset._n = asset.name.toLowerCase();
             rows.push(div);
             let bg = this.make("div", "", ["bg"], div);
-            bg.style.backgroundImage = 'url(media/uploads/asssets/'+asset.id+'.jpg)';
+            bg.style.backgroundImage = 'url('+asset.getImage()+')';
             this.make("h3", asset.name, [], div);
+            if( asset.holder )
+                this.make("p", "Utlånad", ["subtitle"], div);
+
             div.onclick = this._onAssetClick;
 
         }

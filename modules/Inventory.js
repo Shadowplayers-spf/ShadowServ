@@ -54,7 +54,7 @@ export default class Inventory extends DB{
 			updated : this.updated,
 			name : this.name,
 			barcode : this.barcode,
-			holder : this.holder > 0, // Non-admin gets to see if it's loaned out, but not by who
+			holder : +(this.holder > 1), // Non-admin gets to see if it's loaned out, but not by who
 			owner : this.owner,
 			loanable : this.loanable,
 			type : this.type,
