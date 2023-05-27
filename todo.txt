@@ -1,3 +1,8 @@
+- Inventory
+	- Users need to be able to loan certain things
+	- Show if item is missing parts
+	- 
+
 - Barcode scanner (front page)
 	- if asset:
 		- Show its inspect modal.
