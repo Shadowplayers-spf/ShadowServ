@@ -160,8 +160,12 @@
 						<input type="text" name="barcode" required />
 						<input type="button" class="scanBarcode" value="Scanna" name="scanBarcode" />
 					</div>
-					Ägare: <span class="owner"></span> <input type="button" class="editOwner" value="Ändra" /><br />
-					Utlånad till: <span class="holder"></span> <input type="button" class="editLoaner" value="Ändra" /><br />
+					Ägare: <span class="owner"></span> <input type="button" name="editOwner" value="Ändra" style="display:inline-block" /><br />
+					Utlånad till: 
+						<span class="holder"></span> 
+						<input type="button" name="editLoaner" value="Ändra" style="display:inline-block" />
+						<input type="button" name="resetLoaner" value="Återställ" style="display:inline-block" />
+					<br />
 					<label>Aktiv <input type="checkbox" name="active" /></label><br />
 					<label>Utlåningsbar <input type="checkbox" name="loanable" /></label><br />
 					Bild<br />

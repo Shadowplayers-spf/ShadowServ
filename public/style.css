@@ -387,6 +387,14 @@
         
     }
 
+    /* User picker modal */
+    form.userPicker > input{
+        display: inline-block;
+    }
+    div.userPicker > div.searchResult{
+        
+    }
+
 /**/
 
 
@@ -650,6 +658,24 @@
     /* Edit form */
     form.userEdit > p{
         margin-bottom:0;
+    }
+
+    #page-assets div.assets > div.asset{
+        border: var(--color-bright-green) 0.25vmax solid;
+        background:var(--background-black-default);
+        box-shadow: var(--shadow-default);
+        border-top-right-radius: var(--radius-default);
+        color:#EEE;
+        overflow:hidden;
+        box-sizing: border-box;
+        padding:var(--padding-box-default);
+    }
+    #page-assets div.assets > div.asset > h3{
+        margin:0;
+    }
+    #page-assets div.assets > div.asset:active{
+        transform:var(--scale-active);
+        background:var(--background-black-active);
     }
 
 /**/

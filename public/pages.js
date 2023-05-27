@@ -802,6 +802,27 @@ pm.addPage(
         };
 
         this._onAssetClick = event => {
+
+            const id = Math.trunc(event.currentTarget.dataset.id);
+            const asset = this._getAssetById(id);
+            if( !asset )
+                return;
+
+            const div = this.make("div", "", ["asset"]);
+            
+            this.make("h2", asset.name, [], div);
+            this.make("p", asset.description, [], div);
+
+            if( this.parent.user.isAdmin() ){
+
+                const edit = this.make("input", "", [], div);
+                edit.type = "button";
+                edit.value = "Redigera";
+                edit.dataset.href = "assetEdit/"+asset.id;
+
+            }
+
+            pm.setModal(div);
             
         };
 
@@ -821,8 +842,21 @@ pm.addPage(
 
         const rows = [];
         for( let asset of assets ){
-
             
+            const classes = ["asset"];
+            if( asset.holder > 1 )
+                classes.push("loaned");
+            if( !asset.active )
+                classes.push("inactive");
+
+            const div = this.make("div", "", classes);
+            div.dataset.id = asset.id;
+            rows.push(div);
+            let bg = this.make("div", "", ["bg"], div);
+            bg.style.backgroundImage = 'url(media/uploads/asssets/'+asset.id+'.jpg)';
+            this.make("h3", asset.name, [], div);
+            div.onclick = this._onAssetClick;
+
         }
         dom.querySelector("div.assets").replaceChildren(...rows);
 
@@ -863,6 +897,11 @@ pm.addPage(
         assets = assets.map(el => new Inventory(el));
         this.data.set("assets", assets);
 
+        let users = await pm.restReq("GetUsers");   // If we get tons of users at some point you should replace this with a search
+                                                    // With a few nr of users we may as well just pull all of them
+        users = users.map(el => new User(el));
+        this.data.set("users", users);
+
         this._getAssetById = (id) => {
             for( let u of assets ){
                 if( u.id === id )
@@ -870,7 +909,16 @@ pm.addPage(
             }
         };
 
+        this._getUserById = id => {
+            for( let u of users ){
+                
+                if( u.id === id )
+                    return u;
 
+            }
+        };
+
+        
         this._form = document.getElementById("assetEdit");
         this._inputs = {};
         this._submit = this._form.querySelector('input[type=submit]');
@@ -884,6 +932,7 @@ pm.addPage(
     // onBuild
     async function( id ){
         
+        const dom = this.getDom();
         id = Math.trunc(id);
         // Fields that can be loaded directly by value
         const autoFields = [
@@ -904,6 +953,9 @@ pm.addPage(
             id = 0;
         }
         
+        const holder = this._getUserById(asset.holder) || new User({nick : "Shadowplayers"}), // Create a shadowplayers dummy user if no user exists
+            owner = this._getUserById(asset.owner) || new User({nick : "Shadowplayers"})
+        ;
 
         // Update the fields
         const cats = [];
@@ -922,6 +974,30 @@ pm.addPage(
         this._inputs.description.innerText = asset.description;
         this._inputs.active.checked = Boolean(asset.active);
         this._inputs.loanable.checked = Boolean(asset.loanable);
+        const spanHolder = dom.querySelector("span.holder");
+        const spanOwner = dom.querySelector("span.owner");
+        this._inputs.editLoaner.onclick = () => {
+            templates.userPickerModal(this, user => {
+                spanHolder.innerText = user.nick;
+                spanHolder.dataset.id = user.id;
+            });
+        };
+        this._inputs.editOwner.onclick = () => {
+            templates.userPickerModal(this, user => {
+                spanOwner.innerText = user.nick;
+                spanOwner.dataset.id = user.id;
+            });
+        };
+        this._inputs.resetLoaner.onclick = () => {
+            spanHolder.innerText = "Shadowplayers";
+            spanHolder.dataset.id = 0;
+        };
+        
+        // Holder/owner are set in their name spans dataset
+        spanHolder.dataset.id = holder.id;
+        spanHolder.innerText = holder.nick;
+        spanOwner.dataset.id = owner.id;
+        spanOwner.innerText = owner.nick;
         
         this._inputs.scanBarcode.onclick = event => {
             scanner.run(pm, data => {
@@ -942,6 +1018,8 @@ pm.addPage(
             jData.description = this._inputs.description.value;
             jData.active = +this._inputs.active.checked;
             jData.loanable = +this._inputs.loanable.checked;
+            jData.holder = Math.trunc(spanHolder.dataset.id);
+            jData.owner = Math.trunc(spanOwner.dataset.id);
 
             // formdata includes file and args
             out.append('file', this._inputs.image.files[0]);
