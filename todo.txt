@@ -1,7 +1,6 @@
 - Inventory
-	- Users need to be able to loan certain things
+	- Users need to see items they have loaned on top of the inventory page
 	- Show if item is missing parts
-	- 
 
 - Barcode scanner (front page)
 	- if asset:

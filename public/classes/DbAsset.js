@@ -16,7 +16,6 @@ export default class DbAsset{
             const v = data[i],
                 type = typeof this[i]
             ;
-
             if( !this.hasOwnProperty(i) || type === "function" )
                 continue;
 
@@ -25,7 +24,7 @@ export default class DbAsset{
             }
             else if( type === "object" ){
                 
-                let out = {};
+                let out = v || {};
                 if( typeof v === "string" ){
                     try{
                         out = JSON.parse(v);
@@ -36,9 +35,9 @@ export default class DbAsset{
 
                 if( Array.isArray(this[i]) !== Array.isArray(out) )
                     console.error("Trying to turn object into invalid type: ", out, this[i]);
-                else
+                else{
                     this[i] = out;
-                
+                }
             }
             else if( type === "boolean" )
                 this[i] = Boolean(v);

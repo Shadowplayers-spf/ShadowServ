@@ -1,4 +1,5 @@
 import DbAsset from "./DbAsset.js";
+import User from "./User.js";
 
 export default class Inventory extends DbAsset{
 
@@ -29,8 +30,8 @@ export default class Inventory extends DbAsset{
         this.name = '';
 		this.description = '';
 		this.barcode = '';
-		this.holder = 1;			// User loaning this item. By default, this is the Shadowplayers clubhouse.
-		this.owner = 1;				// Who owns this item? Defaults to clubhouse.
+		this.holder = 0;			// User loaning this item. By default, this is the Shadowplayers clubhouse.
+		this.owner = 0;				// Who owns this item? Defaults to clubhouse.
 		this.loanable = 0;			// Whether you can loan this item home or not.
 		this.active = 1;			// When 0, it's something that's no longer available.
 		this.type = this.constructor.TYPES.boardgame;	// Todo: Decide what types of items we should have.
@@ -38,8 +39,25 @@ export default class Inventory extends DbAsset{
 		this.language = 'sv';
 		this.ages = 'alla åldrar';
 		this.complete = this.constructor.COMPLETION.unknown;
+		this._holder = new User();	// Only available to admins or if it's loaned by the active user
 		
 		this.load(...args);
+	}
+
+	isLoanable(){
+		return Boolean(this.loanable);
+	}
+
+	isLoanedToUser( user ){
+		if( user instanceof User )
+			user = Math.trunc(user.id);
+
+		return this._holder === user;
+
+	}
+
+	isLoaned(){
+		return this.holder > 0;
 	}
 
 	getLanguageReadable(){
@@ -61,7 +79,10 @@ export default class Inventory extends DbAsset{
         return '/media/uploads/inventory/'+this.id+".jpg";
     }
 
-	rebase(){}
+	rebase(){
+		console.log("Rebasing ", this._holder);
+		this._holder = new User(this._holder);
+	}
 
 }
 

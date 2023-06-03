@@ -21,7 +21,7 @@ export default class User extends DB{
         this.load(data);
     }
 
-    getOut( full ){
+    async getOut( full ){
         const out = {
             id : this.id,
             nick : this.nick,

@@ -33,7 +33,7 @@ export class ShopItem extends DB{
     }
 
     // Returns data to the front end
-    getOut( admin = false ){
+    async getOut( admin = false ){
 
         const out = {
             id : this.id,

@@ -61,6 +61,9 @@
     *{
         position: relative;
     }
+    *.bold{
+        font-weight: bold;
+    }
     *.hidden{
     display:none !important; 
     }
@@ -132,6 +135,10 @@
         color:var(--white-default);
         margin-bottom: var(--input-margin-bottom);
         font-size:var(--font-size-default);
+    }
+    input.inline{
+        display:inline-block;
+        margin: 0 0.5vmax 0.5vmax 0;
     }
 
     .cost{

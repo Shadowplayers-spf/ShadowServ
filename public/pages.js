@@ -93,9 +93,17 @@ pm.addPage(
 
             const wrap = this.make("div");
             templates.productModal(this, wrap, shopItem);
-
-
             pm.setModal(wrap, false);
+
+        };
+
+        this.buildAssetModal = asset => {
+            
+            const div = this.make("div", "", ["inventoryAsset"]);
+            templates.assetModal(this, div, asset, newAsset => {
+                this.buildAssetModal(newAsset);
+            });
+            pm.setModal(div);
 
         };
 
@@ -163,6 +171,7 @@ pm.addPage(
 
         // Barcode scanner
         dom.querySelector("div.barcode").onclick = event => {
+            
             scanner.run(pm, async data => {
                 
                 const code = data.code;
@@ -174,10 +183,10 @@ pm.addPage(
                 if( type === "ShopItem" )
                     this.buildShopPurchase(new ShopItem(assetData));
                 else if( type == "Inventory" )
-                    console.log("Todo: Handle inventory");
-
+                    this.buildAssetModal(new Inventory(assetData));
 
             });
+
         };
 
     },
@@ -188,7 +197,7 @@ pm.addPage(
 );
 
 
-
+// credits
 pm.addPage(
     "credits",     // id
     true,       // Private
@@ -367,6 +376,7 @@ pm.addPage(
     "user" // back
 );
 
+// store
 pm.addPage(
     "store",     // id
     true,       // Private
@@ -490,7 +500,7 @@ pm.addPage(
 );
 
 
-
+// userManager
 pm.addPage(
     "userManager",     // id
     true,       // Private
@@ -671,7 +681,7 @@ pm.addPage(
 
 
 
-
+// storeEdit
 pm.addPage(
     "storeEdit",    // id
     true,           // Private
@@ -783,7 +793,7 @@ pm.addPage(
     "store"
 );
 
-
+// assets
 pm.addPage(
     "assets",     // id
     true,       // Private
@@ -813,30 +823,23 @@ pm.addPage(
             }
         };
 
+        // Event can also be a numeric ID (used for when asset changes through the modal)
         this._onAssetClick = event => {
 
-            const id = Math.trunc(event.currentTarget.dataset.id);
+            let id = event;
+            if( typeof id !== "number" )
+                id = Math.trunc(event.currentTarget.dataset.id);
             const asset = this._getAssetById(id);
             if( !asset )
                 return;
 
             const div = this.make("div", "", ["inventoryAsset"]);
 
-            const bg = this.make("div", "", ["bg"], div);
-            bg.style.backgroundImage = 'url('+asset.getImage()+')';
-            
-            this.make("h2", asset.name, [], div);
-            this.make("p", asset.ages + " | " + asset.getLanguageReadable(), ["subtitle"], div);
-            this.make("p", asset.description, [], div);
-
-            if( this.parent.user.isAdmin() ){
-
-                const edit = this.make("input", "", [], div);
-                edit.type = "button";
-                edit.value = "Redigera";
-                edit.dataset.href = "assetEdit/"+asset.id;
-
-            }
+            templates.assetModal(this, div, asset, async newAsset => {
+                // reload page and open modal again
+                await pm.setPage("assets");
+                this._onAssetClick(id);
+            });
 
             pm.setModal(div, false);
             
@@ -869,7 +872,7 @@ pm.addPage(
             }
 
             const classes = ["asset"];
-            if( asset.holder > 1 )
+            if( asset.isLoaned() )
                 classes.push("loaned");
             if( !asset.active )
                 classes.push("inactive");
@@ -927,6 +930,7 @@ pm.addPage(
     "user"
 );
 
+// assetEdit
 pm.addPage(
     "assetEdit",    // id
     true,           // Private

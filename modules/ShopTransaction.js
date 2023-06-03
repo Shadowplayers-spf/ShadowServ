@@ -18,7 +18,7 @@ export default class ShopTransaction extends DB{
         this.load(...arguments);
     }
 
-    getOut( full = false ){
+    async getOut( full = false ){
 
         const out = {
             id : this.id,

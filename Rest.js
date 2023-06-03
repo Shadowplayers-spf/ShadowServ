@@ -6,6 +6,8 @@ import { ShopItem } from './modules/ShopItem.js';
 import ShopTransaction from './modules/ShopTransaction.js';
 import sharp from 'sharp';
 import Inventory from './modules/Inventory.js';
+import InventoryLoanLog from './modules/InventoryLoanLog.js';
+import config from './config.js';
 
 export default class Rest{
 
@@ -85,7 +87,7 @@ export default class Rest{
     // Gets userdata for active user
     async pubGetUser(){
 
-        return this.user.getOut(true);
+        return await this.user.getOut(true);
 
     }
     
@@ -105,7 +107,7 @@ export default class Rest{
         // The rest is handled by User
         await user.register(nick, password0, discord);
 
-        const out = this.user.getOut(true);
+        const out = await this.user.getOut(true);
         return out;
 
     }
@@ -117,7 +119,7 @@ export default class Rest{
         if( !att ){
             throw new Error("Felaktig användare/lösenord. Försök igen!");
         }
-        const out = this.user.getOut(true);
+        const out = await this.user.getOut(true);
         return out;
         
     }
@@ -134,7 +136,7 @@ export default class Rest{
         
         await this.user.destroyToken(true);
         this.user = new User();
-        return this.user.getOut(true);
+        return await this.user.getOut(true);
 
     }
 
@@ -178,7 +180,7 @@ export default class Rest{
             const pending = await SwishTransaction.getPendingByUser(this.user);
             // Nothing to do
             if( !pending.length )
-                return this.user.getOut(true);
+                return await this.user.getOut(true);
 
             const promises = [];
             for( let tx of pending )
@@ -196,7 +198,7 @@ export default class Rest{
             await DB.finalizeTransaction(conn); // Finalizes and releases
 
 
-            return this.user.getOut(true);
+            return await this.user.getOut(true);
 
         }catch(err){
             
@@ -215,8 +217,9 @@ export default class Rest{
 
         const isAdmin = this.user.isAdmin();
         const out = await ShopItem.getAll(isAdmin);
-        return out.map(el => el.getOut(isAdmin));
-        
+        const ret = out.map(el => el.getOut(isAdmin));
+        return await Promise.all(ret);
+
     }
     
     /*
@@ -277,17 +280,17 @@ export default class Rest{
 
         const purchases = await ShopTransaction.getAllByUser(this.user);
         const items = new Map(); // Creates a map of unique items
-        const purchaseData = purchases.map(el => {
+        const purchaseData = await Promise.all(purchases.map(el => {
             
             items.set(el.item, true);
             return el.getOut();
 
-        });
+        }));
 
         let purchaseItems = [];
         if( items.size ){
             const boughtItems = await ShopItem.getMultipleById(Array.from(items.keys()));
-            purchaseItems = boughtItems.map(el => el.getOut());
+            purchaseItems = await Promise.all(boughtItems.map(el => el.getOut()));
         }
 
         const swish = await SwishTransaction.getPaidByUser(this.user);
@@ -296,7 +299,7 @@ export default class Rest{
         const out = {
             purchases : purchaseData,
             boughtItems : purchaseItems,
-            swishTransactions : swish.map(el => el.getOut())
+            swishTransactions : await Promise.all(swish.map(el => el.getOut()))
         };
         return out;
 
@@ -318,7 +321,7 @@ export default class Rest{
         if( item?.exists() && item.active )
             return {
                 type : 'ShopItem',
-                data : item.getOut()
+                data : await item.getOut()
             };
 
 
@@ -327,7 +330,7 @@ export default class Rest{
         if( item?.exists() && item.active )
             return {
                 type : 'Inventory',
-                data : item.getOut()
+                data : await item.getOut()
             };
             
         
@@ -344,7 +347,59 @@ export default class Rest{
 
         const isAdmin = this.user.isAdmin();
         const out = await Inventory.getAll(isAdmin);
-        return out.map(el => el.getOut(isAdmin));
+        return await Promise.all(out.map(el => el.getOut(isAdmin, this.user.id)));
+
+    }
+
+    /* Loan an item home */
+    async pvtLoanItem( itemID ){
+
+        const loaned = await Inventory.getLoanedByUser();
+        if( loaned.length >= config.max_loanable )
+            throw new Error("Du har lånat för många saker. Lämna in några för att låna mer!");
+
+        itemID = Math.trunc(itemID);
+        if( !itemID )
+            throw new Error("Felaktigt ID");
+
+        const asset = await Inventory.get(itemID, 1);
+        if( !asset )
+            throw new Error("Prylen hittades inte.");
+
+        if( asset.holder > 0 )
+            throw new Error("Prylen är redan utlånad.");
+        
+        if( !asset.loanable )
+            throw new Error("Prylen går ej att låna.");
+
+        const att = await asset.setHolder(this.user.id);
+        if( !att )
+            throw new Error("Utlåningen misslyckades");
+
+        InventoryLoanLog.create(this.user, asset, InventoryLoanLog.types.loaned);
+        return await asset.getOut(this.user.isAdmin(), this.user.id);
+
+    }
+
+    async pvtReturnItem( itemID ){
+        itemID = Math.trunc(itemID);
+        if( !itemID )
+            throw new Error("Felaktigt ID");
+
+        const asset = await Inventory.get(itemID, 1);
+        if( !asset )
+            throw new Error("Prylen hittades inte");
+        
+        // admins can return other peoples items
+        if( asset.holder !== this.user.id && !this.user.isAdmin() )
+            throw new Error("Prylen är inte utlånad till dig?");
+        
+        const att = await asset.resetHolder();
+        if( !att )
+            throw new Error("Tilbakalämningen misslyckades");
+
+        InventoryLoanLog.create(this.user, asset, InventoryLoanLog.types.returned);
+        return await asset.getOut(this.user.isAdmin(), this.user.id);
 
     }
 
@@ -408,7 +463,7 @@ export default class Rest{
 
         }
 
-        return cur.getOut(true);
+        return await cur.getOut(true);
 
     }
 
@@ -467,7 +522,7 @@ export default class Rest{
 
         }
 
-        return cur.getOut(true);
+        return await cur.getOut(true);
 
     }
 
@@ -492,7 +547,7 @@ export default class Rest{
     async admGetUsers( start = 0, limit = 0 ){
 
         const users = await User.getAll(start, limit);
-        return users.map(el => el.getOut(true));
+        return await Promise.all(users.map(el => el.getOut(true)));
 
     }
 
@@ -510,7 +565,7 @@ export default class Rest{
         
         await user.modify(this.user, data);
         
-        return user.getOut();
+        return await user.getOut();
         
     }
 

@@ -23,7 +23,7 @@ export default class SwishTransaction extends DB{
 
     }
 
-	getOut( full = false ){
+	async getOut( full = false ){
 
 		const out = {
 			id : this.id,

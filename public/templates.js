@@ -1,3 +1,4 @@
+import Inventory from "./classes/Inventory.js";
 import User from "./classes/User.js";
 
 /*
@@ -6,6 +7,7 @@ import User from "./classes/User.js";
 export default {
 
 	// Basic template for displaying a product in a modal.
+	// div is a div to attach the asset to
 	productModal : ( page, div, prod ) => {
 		const user = pm.user;
 
@@ -143,7 +145,93 @@ export default {
 
 		pm.setModal(div);
 
-	}
+	},
+	// Div is where the modal gets attached
+	// onChange is raised if something on the asset is changed, such as who has loaned it, it's raised with 1 arg which is the new asset data from the server
+	assetModal : ( page, div, asset, onChange ) => {
+
+		if( !(asset instanceof Inventory) )
+			return;
+
+		const bg = page.make("div", "", ["bg"], div);
+		const loaned = asset.isLoaned();
+		bg.style.backgroundImage = 'url('+asset.getImage()+')';
+		
+		page.make("h2", asset.name, [], div);
+		page.make("p", asset.ages + " | " + asset.getLanguageReadable(), ["subtitle"], div) + (loaned ? "UTLÅNAD" : '');
+		page.make("p", asset.description, [], div);
+
+		if( !loaned && asset.isLoanable() ){
+			
+			const input = page.make("input", "", ["inline"], div);
+			input.type = "button";
+			input.value = "Låna Hem";
+			input.onclick = async () => {
+				
+				if( input.disabled )
+					return;
+				input.value = "Lånar...";
+				input.disabled = true;
+
+				try{
+					
+					const newAsset = await pm.restReq("LoanItem", [asset.id]);
+					if( onChange && newAsset )
+						onChange(newAsset);
+					
+				}catch(err){
+					pm.addError(err.message, false);
+				}
+				input.value = "Låna Hem";
+				input.disabled = false;
+
+			};
+
+		}
+
+		if( pm.user.isAdmin() ){
+
+			if( loaned )
+				page.make("p", "Utlånad till "+asset._holder.nick, ["loanedTo", "bold"], div);
+			
+			const edit = page.make("input", "", ["inline"], div);
+			edit.type = "button";
+			edit.value = "Redigera";
+			edit.dataset.href = "assetEdit/"+asset.id;
+
+		}
+
+		// Return loaned items. Amins can return for other users.
+		if( loaned && (pm.user.isAdmin() || pm.user.id === asset._holder) ){
+
+			const input = page.make("input", "", ["inline"], div);
+			input.type = "button";
+			input.value = "Lämna Tillbaks";
+			input.onclick = async () => {
+				
+				if( input.disabled )
+					return;
+
+				input.value = "Lämnar tillbaka...";
+				input.disabled = true;
+
+				try{
+					
+					const newAsset = await pm.restReq("ReturnItem", [asset.id]);
+					if( onChange && newAsset )
+						onChange(newAsset);
+					
+				}catch(err){
+					pm.addError(err.message, false);
+				}
+				input.value = "Låna Hem";
+				input.disabled = false;
+
+			};
+
+		}
+
+	},
 
 };
 
