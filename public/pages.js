@@ -101,7 +101,7 @@ pm.addPage(
             
             const div = this.make("div", "", ["inventoryAsset"]);
             templates.assetModal(this, div, asset, newAsset => {
-                this.buildAssetModal(newAsset);
+                this.buildAssetModal(new Inventory(newAsset));
             });
             pm.setModal(div);
 
@@ -799,11 +799,16 @@ pm.addPage(
     true,       // Private
     // onLoad
     async function(){
+        const usr = this.parent.user;
 
         let assets = await pm.restReq("GetAssets");
         assets = assets.map(el => new Inventory(el));
         assets.sort((a,b) => {
             
+            const aMine = usr.id === a.holder;
+            const bMine = usr.id === b.holder;
+            if( aMine !== bMine )
+                return aMine ? -1 : 1;
             if( a.type !== b.type )
                 return a.type < b.type ? -1 : 1;
             if( a.active !== b.active )
@@ -845,7 +850,6 @@ pm.addPage(
             
         };
 
-        console.log("Assets", assets);
         
     },
     // onBuild
@@ -862,12 +866,17 @@ pm.addPage(
         let curCat;
         const rows = [];
         for( let asset of assets ){
+
+            let cat = asset.getTypeSE();
+            const loanedToMe = asset.holder === user.id;
+            if( loanedToMe )
+                cat = "MINA LÅNADE SPEL";
             
-            if( curCat !== asset.getTypeSE() ){
+            if( curCat !== cat ){
                 
-                curCat = asset.getTypeSE();
-                const cat = this.make("h2", curCat, ["category"]);
-                rows.push(cat);
+                curCat = cat;
+                const cHeader = this.make("h2", curCat, ["category"]);
+                rows.push(cHeader);
 
             }
 
@@ -876,6 +885,8 @@ pm.addPage(
                 classes.push("loaned");
             if( !asset.active )
                 classes.push("inactive");
+            if( loanedToMe )
+                classes.push("loanedByMe");
 
             const div = this.make("div", "", classes);
             div.dataset.id = asset.id;
@@ -894,6 +905,8 @@ pm.addPage(
                 subtitle.push(asset.ages);
             if( asset.holder )
                 subtitle.push("Utlånad");
+            if( asset.complete && asset.complete !== Inventory.COMPLETION.full )
+                subtitle.push(asset.getCompletionText());
 
             if( subtitle.length )
                 this.make("p", subtitle.join(" | "), ["subtitle"], div);

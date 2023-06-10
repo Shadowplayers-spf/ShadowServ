@@ -20,8 +20,8 @@ export default class Inventory extends DbAsset{
     static COMPLETION = {
 		unknown : 0,
 		partial_heavy : 1,
-		partial_light : 1,
-		full : 2
+		partial_light : 2,
+		full : 3
 	};
 
 	constructor(...args){
@@ -54,6 +54,17 @@ export default class Inventory extends DbAsset{
 
 		return this._holder === user;
 
+	}
+
+
+	getCompletionText(){
+		const texts = [
+			"Okänd",
+			"Dåligt skick",
+			"Saknar delar",
+			"Komplett"
+		];	
+		return texts[this.complete];
 	}
 
 	isLoaned(){

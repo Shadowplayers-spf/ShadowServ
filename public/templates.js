@@ -158,7 +158,13 @@ export default {
 		bg.style.backgroundImage = 'url('+asset.getImage()+')';
 		
 		page.make("h2", asset.name, [], div);
-		page.make("p", asset.ages + " | " + asset.getLanguageReadable(), ["subtitle"], div) + (loaned ? "UTLÅNAD" : '');
+		page.make("p", 
+			asset.ages + " | " + 
+			asset.getLanguageReadable() +
+			(loaned ? " | UTLÅNAD" : '') +
+			(asset.complete && asset.complete !== Inventory.COMPLETION.full ? ' | '+asset.getCompletionText() : ''), 
+			["subtitle"], div)
+		;
 		page.make("p", asset.description, [], div);
 
 		if( !loaned && asset.isLoanable() ){

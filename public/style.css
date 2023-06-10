@@ -16,11 +16,13 @@
         --input-margin-bottom: 0.5vmax;
         --padding-box-default: 1vmax;
         --border-default: 1px solid var(--color-cyberpunk);
+        --boarder-thicc-width: 0.5vmax;
         --background-black-active: rgba(50,50,50,0.75);
         --font-size-default: 2vmax;
         --color-bright-green: #AFA;
         --color-dark-green: #363;
         --color-bright-red: #FAA;
+        --color-bright-orange: #FDA;
         --color-dark-red: #611;
         --color-noticebox-green: rgba(200,255,200,0.75);
         --bg-gradient-green: linear-gradient(to bottom, rgba(229,252,188,1) 0%,rgba(153,248,0,1) 98%);
@@ -687,6 +689,14 @@
         border-color: var(--color-bright-red);
         color: var(--color-bright-red);
     }
+    #page-assets div.assets > div.asset.loanedByMe h3{
+        color: var(--color-bright-orange);
+    }
+    #page-assets div.assets > div.asset.loanedByMe{
+        border-color: var(--color-bright-orange);
+        border-width: var(--boarder-thicc-width);
+        color: var(--color-bright-orange);
+    }
     #page-assets div.assets > div.asset.inactive{
         opacity:0.5;
     }
@@ -709,6 +719,8 @@
         position: absolute;
         bottom: 0; right:0;
         padding: 0.5vmax 1vmax;
+        font-size: 1.8vmax;
+        max-width: 70%;
     }
     
     
@@ -733,6 +745,7 @@
     }
     div.inventoryAsset p.subtitle{
         text-transform: capitalize;
+        font-size: 2vmax;
     }
 
 /**/
