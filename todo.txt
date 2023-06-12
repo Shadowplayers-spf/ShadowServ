@@ -1,8 +1,10 @@
 - Offline/App:
 	- Add webmanifest.
 
+- Put swish online
+- Discord/app/ebas sync?
 - Backups
 	- ???
 - Hosting
 	- ???
-	
+
