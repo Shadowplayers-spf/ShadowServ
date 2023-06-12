@@ -1,3 +1,15 @@
+- Användare kan inte lämna tillbaks spel
+- Swish funkar inte
+- Bara köpa genom att scanna streckkod
+- Bara låna hem genom att scanna streckkod
+- Streckkod bör inte sändas till användare (enbart admins)
+- Admin log
+- Kolla hur det gäller med swish om man kan ha ett certifikat enbart för att ta emot pengar
+- Ladda upp det på webhotellet
+- Backups på min server
+	- Config för att ta emot backups.
+	- 
+
 - Offline/App:
 	- Add webmanifest.
 
@@ -6,3 +18,5 @@
 - Hosting
 	- ???
 	
+
+- Publicera live
