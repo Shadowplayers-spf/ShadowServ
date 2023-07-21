@@ -8,7 +8,7 @@ export default {
 
 	// Basic template for displaying a product in a modal.
 	// div is a div to attach the asset to
-	productModal : ( page, div, prod ) => {
+	productModal : ( page, div, prod, canBuy = false ) => {
 		const user = pm.user;
 
 		const bg = page.make("div", "", ["shopBg"], div);
@@ -22,34 +22,41 @@ export default {
 		if( prod.age_restriction )
 			page.make('p', "+"+prod.age_restriction+" år", ["subtitle", "restricted"], info);
 		
-		page.make('p', prod.stock+' i lager', ['subtitle', (prod.stock > 0 ? 'cost' : 'restricted')], info);
-
+		//page.make('p', prod.stock+' i lager', ['subtitle', (prod.stock > 0 ? 'cost' : 'restricted')], info);
+		
 		page.make('p', prod.description, ['desc'], info);
 
-		let buyWrap = page.make("div", "", ["buyButton"], info);
-		let buyButton = page.make('input', "", [], buyWrap);
-		buyButton.type = 'button';
-		const funded = prod.cost <= pm.user.shop_credit;
-		buyButton.disabled = !funded;
-		buyButton.value = 'Köp för '+(prod.cost/100)+'kr';
-		
-		buyButton.onclick = async () => {
+		if( canBuy ){
 
-			if( prod.cost > pm.user.shop_credit ){
-				pm.error("addError", "För lite kioskkredit på kontot.");
-				return false;
-			}
+			let buyWrap = page.make("div", "", ["buyButton"], info);
+			let buyButton = page.make('input', "", [], buyWrap);
+			buyButton.type = 'button';
+			const funded = prod.cost <= pm.user.shop_credit;
+			buyButton.disabled = !funded;
+			buyButton.value = 'Köp för '+(prod.cost/100)+'kr';
 			
-			await pm.restReq("PurchaseShopItem", prod.id);
-			
-			const succ = page.make("div");
-			page.make("h3", "Köpet Har Genomförts!", [], succ);
-			page.make("div", String(prod.name).toUpperCase(), ["productBought", "center"], succ);
-			pm.setModal(succ);
-			pm.updateShopCredit();
+			buyButton.onclick = async () => {
 
-		};
-		
+				if( prod.cost > pm.user.shop_credit ){
+					pm.error("addError", "För lite kioskkredit på kontot.");
+					return false;
+				}
+				
+				await pm.restReq("PurchaseShopItem", prod.id);
+				
+				const succ = page.make("div");
+				page.make("h3", "Köpet Har Genomförts!", [], succ);
+				page.make("div", String(prod.name).toUpperCase(), ["productBought", "center"], succ);
+				pm.setModal(succ);
+				pm.updateShopCredit();
+
+			};
+
+		}
+		else
+			page.make('p', 'Scanna på förstasidan för att köpa.', ['subtitle', 'restricted'], info);
+
+
 		// Admin functions
 		if( user.isAdmin() ){
 			
@@ -148,7 +155,7 @@ export default {
 	},
 	// Div is where the modal gets attached
 	// onChange is raised if something on the asset is changed, such as who has loaned it, it's raised with 1 arg which is the new asset data from the server
-	assetModal : ( page, div, asset, onChange ) => {
+	assetModal : ( page, div, asset, onChange, canLoan = false ) => {
 
 		if( !(asset instanceof Inventory) )
 			return;
@@ -167,7 +174,7 @@ export default {
 		;
 		page.make("p", asset.description, [], div);
 
-		if( !loaned && asset.isLoanable() ){
+		if( !loaned && asset.isLoanable() && canLoan ){
 			
 			const input = page.make("input", "", ["inline"], div);
 			input.type = "button";
@@ -195,6 +202,10 @@ export default {
 
 		}
 
+		if( !canLoan )
+			page.make('p', 'Scanna på förstasidan för att låna hem.', ['subtitle', 'restricted'], div);
+		
+
 		if( pm.user.isAdmin() ){
 
 			if( loaned )
@@ -207,8 +218,7 @@ export default {
 
 		}
 
-		// Return loaned items. Amins can return for other users.
-		if( loaned && (pm.user.isAdmin() || pm.user.id === asset._holder) ){
+		if( loaned && (pm.user.isAdmin() || pm.user.id === asset.holder) ){
 
 			const input = page.make("input", "", ["inline"], div);
 			input.type = "button";

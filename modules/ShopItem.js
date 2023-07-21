@@ -39,7 +39,6 @@ export class ShopItem extends DB{
             id : this.id,
             name : this.name,
             description : this.description,
-            barcode : this.barcode,
             active : this.active,
             cost : this.cost,
             age_restriction : this.age_restriction,
@@ -47,6 +46,7 @@ export class ShopItem extends DB{
         };
         if( admin ){
             
+            out.barcode = this.barcode;
             out.stock = this.stock;
             out.comment = this.comment;
 

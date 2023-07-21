@@ -67,7 +67,6 @@ pm.addPage(
             ;
 
             const req = await pm.restReq("Register", [user, pass0, pass1, discord]);
-            console.log("Response", req);
             if( req ){
                 console.log("Setting user and page");
                 pm.setUser(new User(req));
@@ -92,7 +91,7 @@ pm.addPage(
         this.buildShopPurchase = shopItem => {
 
             const wrap = this.make("div");
-            templates.productModal(this, wrap, shopItem);
+            templates.productModal(this, wrap, shopItem, true);
             pm.setModal(wrap, false);
 
         };
@@ -102,7 +101,7 @@ pm.addPage(
             const div = this.make("div", "", ["inventoryAsset"]);
             templates.assetModal(this, div, asset, newAsset => {
                 this.buildAssetModal(new Inventory(newAsset));
-            });
+            }, true);
             pm.setModal(div);
 
         };
@@ -432,7 +431,7 @@ pm.addPage(
         const dom = this.getDom();
         const products = this.data.get("products");
         const user = this.parent.user;
-
+        const admin = user.isAdmin();
         
         const divProducts = dom.querySelector("div.products");
         const prods = [];
@@ -456,7 +455,7 @@ pm.addPage(
             const classes = ['product'];
             if( !product.active )
                 classes.push('inactive');
-            if( !product.stock )
+            if( !product.stock && admin )
                 classes.push('outOfStock');
 
             const div = this.make("div", '', classes);
@@ -475,12 +474,16 @@ pm.addPage(
             
             const costRow = this.make('p', '', 'costRow', ruler);
             this.make('span', product.cost/100 + " kr", 'cost', costRow);
-            const stockClasses = ['stock'];
-            if( !product.stock )
-                stockClasses.push('out');
 
-            if( !product.stock || user.isAdmin() )
+            if( admin ){
+
+                const stockClasses = ['stock'];
+                if( !product.stock )
+                    stockClasses.push('out');
+
                 this.make('span', ", "+(product.stock ? product.stock+" stk" : 'Slutsåld'), stockClasses, costRow);
+
+            }
 
             div.onclick = this._onProductClick;
             
@@ -1081,8 +1084,6 @@ pm.addPage(
             // formdata includes file and args
             out.append('file', this._inputs.image.files[0]);
             out.append("args", JSON.stringify([id, jData]));
-
-            console.log("jData ", jData);
 
             this._submit.value = 'Sparar...';
             const ret = await pm.restReq("CreateAsset", out);

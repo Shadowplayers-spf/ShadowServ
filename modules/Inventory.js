@@ -75,12 +75,18 @@ export default class Inventory extends DB{
 
 		}
 
+
+		// If this was loaned by you, we include the holder
 		if( this.holder && (admin || restUserId === this.holder) ){
 
 			const usr = await User.get(this.holder, true);
 			out._holder = await usr.getOut();
+			out.holder = this.holder;
 
 		}
+
+		//console.log("USR out", out._holder, "this", this.id, "holder", this.holder, "restuserid", restUserId);
+
 
 		return out;
 

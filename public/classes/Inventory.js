@@ -41,6 +41,7 @@ export default class Inventory extends DbAsset{
 		this.complete = this.constructor.COMPLETION.unknown;
 		this._holder = new User();	// Only available to admins or if it's loaned by the active user
 		
+		console.log("Loading", args);
 		this.load(...args);
 	}
 
@@ -91,7 +92,6 @@ export default class Inventory extends DbAsset{
     }
 
 	rebase(){
-		console.log("Rebasing ", this._holder);
 		this._holder = new User(this._holder);
 	}
 
