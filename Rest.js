@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import Inventory from './modules/Inventory.js';
 import InventoryLoanLog from './modules/InventoryLoanLog.js';
 import config from './config.js';
+import AdminLog from './modules/AdminLog.js';
 
 export default class Rest{
 
@@ -390,13 +391,18 @@ export default class Rest{
         if( !asset )
             throw new Error("Prylen hittades inte");
         
+        const holder = asset.holder;
+        
         // admins can return other peoples items
-        if( asset.holder !== this.user.id && !this.user.isAdmin() )
+        if( holder !== this.user.id && !this.user.isAdmin() )
             throw new Error("Prylen är inte utlånad till dig?");
         
         const att = await asset.resetHolder();
         if( !att )
             throw new Error("Tilbakalämningen misslyckades");
+
+        if( this.user.isAdmin() && holder !== this.user.id )
+            AdminLog.create(this.user, AdminLog.TYPES.loanEdit, {holder : holder}, {holder : asset.holder});
 
         InventoryLoanLog.create(this.user, asset, InventoryLoanLog.types.returned);
         return await asset.getOut(this.user.isAdmin(), this.user.id);
@@ -428,10 +434,14 @@ export default class Rest{
         let cur = new ShopItem();
         // Update an existing one
         if( id > 0 ){
+
             cur = await ShopItem.get(id, 1);
             if( !cur )
                 throw new Error("Produkten hittades inte");
+
         }
+        
+        const pre = new ShopItem(cur);
 
         // Update fields
         for( let field of ShopItem.ADMIN_SETTABLE ){
@@ -441,6 +451,9 @@ export default class Rest{
 
         }
         await cur.saveOrInsert();
+
+        // Admin log
+        AdminLog.create(this.user, AdminLog.TYPES.shopItemEdit, pre, cur);
 
         // Handle image upload after making sure it's inserted
         if( this.files[0] ){
@@ -492,6 +505,8 @@ export default class Rest{
 
         }
 
+        const pre = new Inventory(cur);
+
         // Update fields
         for( let field of Inventory.ADMIN_SETTABLE ){
             
@@ -500,6 +515,8 @@ export default class Rest{
 
         }
         await cur.saveOrInsert();
+
+        AdminLog.create(this.user, AdminLog.TYPES, pre, cur);
 
         // Handle image upload after making sure it's inserted
         if( this.files[0] ){
@@ -536,7 +553,9 @@ export default class Rest{
         if( !item )
             throw new Error("Item not found");
 
+        const pre = new ShopItem(item);
         await item.addStock(amount);
+        AdminLog.create(this.user, AdminLog.TYPES.inventoryEdit, pre, item);
         return true;
 
     }
@@ -563,7 +582,9 @@ export default class Rest{
         if( user.privilege >= this.user.privilege )
             throw new Error("Can't edit user with equal or higher privilege");
         
+        const pre = new User(user);
         await user.modify(this.user, data);
+        AdminLog.create(this.user, AdminLog.TYPES.userEdit, pre, user);
         
         return await user.getOut();
         
@@ -583,6 +604,7 @@ export default class Rest{
         if( user.privilege >= this.user.privilege )
             throw new Error("Can't edit user with equal or higher privilege");
 
+        
         const passwd = await user.generateRandomPassword();
         return {
             password : passwd
@@ -601,6 +623,7 @@ export default class Rest{
         if( user.privilege >= this.user.privilege )
             throw new Error("Can't delete user with equal or higher privilege");
 
+        AdminLog.create(this.user, AdminLog.TYPES.userDelete, user, {id:user.id});
         await user.delete();
         return true;
 
