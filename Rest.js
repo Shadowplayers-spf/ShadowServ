@@ -92,26 +92,7 @@ export default class Rest{
 
     }
     
-    async pubRegister( nick, password0, password1, discord = "" ){
-
-        nick = String(nick).trim();
-        password0 = String(password0);
-        password1 = String(password1);
-        discord = String(discord).trim();
-
-        const user = new User();
-        this.user = user;
-
-        if( password0 !== password1 )
-            throw new Error("Passwords don't match");
-
-        // The rest is handled by User
-        await user.register(nick, password0, discord);
-
-        const out = await this.user.getOut(true);
-        return out;
-
-    }
+    
 
     // Fetches userdata and generates a new 
     async pubLogin( nick, password ){
@@ -629,6 +610,24 @@ export default class Rest{
 
     }
 
+    /*
+    
+    */
+    async admRegister( nick, password, discord = "" ){
+
+        nick = String(nick).trim();
+        password = String(password);
+        discord = String(discord).trim();
+
+        const user = new User();
+
+        // The rest is handled by User
+        await user.register(nick, password, discord);
+
+        const out = await this.user.getOut(true);
+        return out;
+
+    }
 
 }
 

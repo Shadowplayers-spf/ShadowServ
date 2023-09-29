@@ -47,10 +47,22 @@ pm.addPage(
 // Signup
 pm.addPage(
     "signup",       // id
-    false,          // private
+    true,          // private
     // onLoad
     async function(){
 
+        this._resetPassField = () => {
+            
+            const arr = new Uint8Array(6 / 2);
+            window.crypto.getRandomValues(arr);
+            let pass = Array.from(arr, dec => {
+                return dec.toString(16).padStart(2, "0");
+            }).join('');
+            this.getDom().querySelector("input[name=password]").value = pass;
+
+        };
+        this._resetPassField();
+        
     },
     // onBuild
     async function(){
@@ -61,16 +73,21 @@ pm.addPage(
 
             const
                 user = dom.querySelector("input[name=username]").value,
-                pass0 = dom.querySelector("input[name=password0]").value,
-                pass1 = dom.querySelector("input[name=password1]").value,
+                pass = dom.querySelector("input[name=password]").value,
                 discord = dom.querySelector("input[name=discord]").value
             ;
 
-            const req = await pm.restReq("Register", [user, pass0, pass1, discord]);
+            const req = await pm.restReq("Register", [user, pass, discord]);
             if( req ){
-                console.log("Setting user and page");
-                pm.setUser(new User(req));
-                pm.setPage("user");
+                //console.log("Setting user and page");
+                //pm.setUser(new User(req));
+                //pm.setPage("user");
+                pm.addNotice("Ny användare har skapats. Dela lösenordet "+pass);
+
+                dom.querySelector("input[name=username]").value = "";
+                dom.querySelector("input[name=discord]").value = "";
+                this._resetPassField();
+
             }
 
         };
@@ -78,7 +95,8 @@ pm.addPage(
     // onUnload
     async function(){
 
-    }
+    },
+    "userManager" // back
 );
 
 // User main page
@@ -625,6 +643,7 @@ pm.addPage(
             };
 
         };
+
         
     },
     // onBuild
@@ -671,6 +690,7 @@ pm.addPage(
             });
             
         };
+
 
 
     },

@@ -1,18 +1,8 @@
-- Swish funkar inte (förmodligen certifikatfel)
-- Kolla hur det gäller med swish om man kan ha ett certifikat enbart för att ta emot pengar
-- Ladda upp det på webhotellet
-- Backups på min server
-	- Config för att ta emot backups.
-	- 
+- Testa
+- Fixa riktig swish
 
-- Offline/App:
-	x Add webmanifest.
-	- Create logos
-	- Serviceworker
-
+- Proper serviceworker
 - Put swish online
 - Discord/app/ebas sync?
 - Backups
-	- ???
-- Hosting
 	- ???
