@@ -5,8 +5,11 @@ export default class Inventory extends DbAsset{
 
     static TYPES = {
 		boardgame : 'boardgame',
+		cardgame : 'cardgame',
 		book : 'book',
 		electronic_game : 'electronic_game',
+		hardware : 'hardware',
+		equipment : 'equipment',
 		other : 'other',
 	};
 
@@ -15,6 +18,9 @@ export default class Inventory extends DbAsset{
 		book : 'bok',
 		electronic_game : 'elektroniskt spel',
 		other : 'annat',
+		cardgame : 'kortspel',
+		hardware : 'hårdvara',
+		equipment : 'utrusting',
 	};
 
     static COMPLETION = {
@@ -37,7 +43,10 @@ export default class Inventory extends DbAsset{
 		this.type = this.constructor.TYPES.boardgame;	// Todo: Decide what types of items we should have.
 		this.comment = '';			// Comment for admins only
 		this.language = 'sv';
-		this.ages = 'alla åldrar';
+		this.min_age = 0;
+		this.min_players = 0;
+		this.max_players = 0;
+		this.round_time = 0;
 		this.complete = this.constructor.COMPLETION.unknown;
 		this._holder = new User();	// Only available to admins or if it's loaned by the active user
 		

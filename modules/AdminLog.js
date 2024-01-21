@@ -40,9 +40,10 @@ export default class AdminLog extends DB{
         obj.type = type;
         obj.user = user;
 
-        if( !this.TYPES[type] )
+        if( !this.TYPES[type] ){
+            console.error("Admin log received args", arguments);
             throw new Error("Invalid admin log type: "+obj.type);
-        
+        }
         const preData = {}, postData = {};
         for( let i in preAsset ){
 

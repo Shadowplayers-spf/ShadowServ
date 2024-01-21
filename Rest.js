@@ -52,34 +52,38 @@ export default class Rest{
         if( !Array.isArray(args) )
             args = [args];
     
-        // Public tasks
-        let fn = "pub"+task;
-        if( typeof this[fn] === "function" )
-            return await this[fn].call(this, ...args);
-        
-        // Logged in tasks
-        fn = "pvt"+task;
-        if( typeof this[fn] === "function" ){
-
-            if( !this.user.isLoggedIn() ){
-                throw new Error("Access denied");
+        try{
+            // Public tasks
+            let fn = "pub"+task;
+            if( typeof this[fn] === "function" ){
+                return await this[fn].call(this, ...args);
             }
-            return await this[fn].call(this, ...args);
+            
+            // Logged in tasks
+            fn = "pvt"+task;
+            if( typeof this[fn] === "function" ){
 
-        }
+                if( !this.user.isLoggedIn() ){
+                    throw new Error("Access denied");
+                }
+                return await this[fn].call(this, ...args);
 
-        // Admin tasks
-        fn = "adm"+task;
-        if( typeof this[fn] === "function" ){
-
-            if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
-                throw new Error("Access denied");
             }
-            return await this[fn].call(this, ...args);
 
+            // Admin tasks
+            fn = "adm"+task;
+            if( typeof this[fn] === "function" ){
+
+                if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
+                    throw new Error("Access denied");
+                }
+                return await this[fn].call(this, ...args);
+
+            }
         }
-    
-                
+        catch( err ){
+            throw err; // rethrow because async
+        }       
 
         throw new Error("Task invalid: "+task);
 
@@ -382,8 +386,14 @@ export default class Rest{
         if( !att )
             throw new Error("Tilbakalämningen misslyckades");
 
-        if( this.user.isAdmin() && holder !== this.user.id )
-            AdminLog.create(this.user, AdminLog.TYPES.loanEdit, {holder : holder}, {holder : asset.holder});
+        if( this.user.isAdmin() && holder !== this.user.id ){
+            
+            try{
+                AdminLog.create(this.user, AdminLog.TYPES.loanEdit, {holder : holder}, {holder : asset.holder});
+            }catch(err){
+                console.error("Failed to make admin log", err);
+            }
+        }
 
         InventoryLoanLog.create(this.user, asset, InventoryLoanLog.types.returned);
         return await asset.getOut(this.user.isAdmin(), this.user.id);
@@ -434,7 +444,11 @@ export default class Rest{
         await cur.saveOrInsert();
 
         // Admin log
-        AdminLog.create(this.user, AdminLog.TYPES.shopItemEdit, pre, cur);
+        try{
+            AdminLog.create(this.user, AdminLog.TYPES.shopItemEdit, pre, cur);
+        }catch(err){
+            console.error("Failed to make admin log", err);
+        }
 
         // Handle image upload after making sure it's inserted
         if( this.files[0] ){
@@ -497,8 +511,11 @@ export default class Rest{
         }
         await cur.saveOrInsert();
 
-        AdminLog.create(this.user, AdminLog.TYPES, pre, cur);
-
+        try{
+            AdminLog.create(this.user, AdminLog.TYPES.inventoryEdit, pre, cur);
+        }catch(err){
+            console.error("Failed to create admin log", err);
+        }
         // Handle image upload after making sure it's inserted
         if( this.files[0] ){
             
@@ -536,7 +553,11 @@ export default class Rest{
 
         const pre = new ShopItem(item);
         await item.addStock(amount);
-        AdminLog.create(this.user, AdminLog.TYPES.inventoryEdit, pre, item);
+        try{
+            AdminLog.create(this.user, AdminLog.TYPES.inventoryEdit, pre, item);
+        }catch(err){
+            console.error("Admin long failed to create", err);
+        }
         return true;
 
     }
@@ -565,8 +586,11 @@ export default class Rest{
         
         const pre = new User(user);
         await user.modify(this.user, data);
-        AdminLog.create(this.user, AdminLog.TYPES.userEdit, pre, user);
-        
+        try{
+            AdminLog.create(this.user, AdminLog.TYPES.userEdit, pre, user);
+        }catch(err){
+            console.error("Failed to make admin log", err);
+        }
         return await user.getOut();
         
     }
@@ -603,8 +627,11 @@ export default class Rest{
             throw new Error("User not found");
         if( user.privilege >= this.user.privilege )
             throw new Error("Can't delete user with equal or higher privilege");
-
-        AdminLog.create(this.user, AdminLog.TYPES.userDelete, user, {id:user.id});
+        try{
+            AdminLog.create(this.user, AdminLog.TYPES.userDelete, user, {id:user.id});
+        }catch(err){
+            console.error("Failed to make admin log", err);
+        }
         await user.delete();
         return true;
 

@@ -924,8 +924,8 @@ pm.addPage(
             let subtitle = [];
             if( asset.language !== "sv" )
                 subtitle.push(asset.getLanguageReadable());
-            if( asset.ages.toLowerCase() !== "alla åldrar" )
-                subtitle.push(asset.ages);
+            if( asset.min_age )
+                subtitle.push(asset.min_age+'+ år');
             if( asset.holder )
                 subtitle.push("Utlånad");
             if( asset.complete && asset.complete !== Inventory.COMPLETION.full )
@@ -1006,6 +1006,7 @@ pm.addPage(
         const all = this._form.querySelectorAll("[name]");
         for( let el of all )
             this._inputs[el.name] = el;
+
         
 
     },
@@ -1018,7 +1019,10 @@ pm.addPage(
         const autoFields = [
             "name",
             "barcode",
-            "ages",
+            "min_age",
+            "min_players",
+            "max_players",
+            "round_time",
             "language",
             "type",
             "comment",
@@ -1048,8 +1052,15 @@ pm.addPage(
         }
         this._inputs.type.replaceChildren(...cats);
          
-        for( let field of autoFields )
+        for( let field of autoFields ){
+            
+            if( !this._inputs[field] ){
+                console.error("No input found for ", field, "check index.html");
+                continue;
+            }
             this._inputs[field].value = asset[field];
+
+        }
 
         this._inputs.description.innerText = asset.description;
         this._inputs.active.checked = Boolean(asset.active);

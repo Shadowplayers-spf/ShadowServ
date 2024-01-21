@@ -181,8 +181,14 @@
 					<label>Utlåningsbar <input type="checkbox" name="loanable" /></label><br />
 					Bild<br />
 					<input type="file" name="image" accept="image/*" />
-					Åldrar<br />
-					<input type="text" name="ages" />
+					Min ålder<br />
+					<input type="number" step=1 min="0" name="min_age" />
+					Min Spelare<br />
+					<input type="number" step="1" min="0" name="min_players" />
+					Max spelare<br />
+					<input type="number" step="1" min="0" name="max_players" />
+					Spelrunda i minuter<br />
+					<input type="number" step="1" min="0" name="round_time" />
 					Språk<br />
 					<select name="language">
 						<option value="">Okänd</option>

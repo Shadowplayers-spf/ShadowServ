@@ -1,6 +1,9 @@
 - Testa
 - Fixa riktig swish
 
+- Add num players to front end
+- Add play time to front end
+
 - Proper serviceworker
 - Put swish online
 - Discord/app/ebas sync?

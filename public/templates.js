@@ -166,7 +166,7 @@ export default {
 		
 		page.make("h2", asset.name, [], div);
 		page.make("p", 
-			asset.ages + " | " + 
+			asset.min_age + "+ år | " + 
 			asset.getLanguageReadable() +
 			(loaned ? " | UTLÅNAD" : '') +
 			(asset.complete && asset.complete !== Inventory.COMPLETION.full ? ' | '+asset.getCompletionText() : ''), 

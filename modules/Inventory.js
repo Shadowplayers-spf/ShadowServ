@@ -11,7 +11,7 @@ export default class Inventory extends DB{
 
     // Fields that are accepted as is using the admin REST entrypoint
     static ADMIN_SETTABLE = [
-        'name', 'description', 'barcode', 'active', 'holder', 'owner', 'loanable', 'type', 'comment', 'language', 'ages', 'complete'
+        'name', 'description', 'barcode', 'active', 'holder', 'owner', 'loanable', 'type', 'comment', 'language', 'min_age', 'complete', 'min_players', 'max_players', 'round_time'
     ];
 
 	static COMPLETION = {
@@ -23,8 +23,11 @@ export default class Inventory extends DB{
 
 	static TYPES = {
 		boardgame : 'boardgame',
+		cardgame : 'cardgame',
 		book : 'book',
 		electronic_game : 'electronic_game',
+		hardware : 'hardware',
+		equipment : 'equipment',
 		other : 'other',
 	};
 
@@ -41,7 +44,10 @@ export default class Inventory extends DB{
 		this.type = 'boardgame';	// Todo: Decide what types of items we should have.
 		this.comment = '';			// Comment for admins only
 		this.language = 'sv';
-		this.ages = 'alla åldrar';
+		this.min_age = 0;
+		this.min_players = 0;
+		this.max_players = 0;
+		this.round_time = 0;		// Time in minutes
 		this.complete = this.constructor.COMPLETION.unknown;
 
 		this.load(...arguments);
@@ -61,9 +67,12 @@ export default class Inventory extends DB{
 			loanable : this.loanable,
 			type : this.type,
 			language : this.language,
-			ages : this.ages,
+			min_age : this.min_age,
 			complete : this.complete,
 			description : this.description,
+			min_players : this.min_players,
+			max_players : this.max_players,
+			round_time : this.round_time,
 			_holder : {},
 		};
 
@@ -141,8 +150,8 @@ export default class Inventory extends DB{
 			this.id = q.insertId;
 		}
 
-		await this.query("UPDATE "+this.constructor.table+" SET name=?, description=?, barcode=?, holder=?, owner=?, loanable=?, active=?, type=?, comment=?, language=?, ages=?, complete=? WHERE id=?", [
-			this.name, this.description, this.barcode, this.holder, this.owner, this.loanable, this.active, this.type, this.comment, this.language, this.ages, this.complete,  this.id
+		await this.query("UPDATE "+this.constructor.table+" SET name=?, description=?, barcode=?, holder=?, owner=?, loanable=?, active=?, type=?, comment=?, language=?, min_age=?, complete=?, min_players=?, max_players=?, round_time=? WHERE id=?", [
+			this.name, this.description, this.barcode, this.holder, this.owner, this.loanable, this.active, this.type, this.comment, this.language, this.min_age, this.complete, this.min_players, this.max_players,  this.round_time, this.id
 		]);
 
 	}

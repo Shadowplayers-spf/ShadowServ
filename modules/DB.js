@@ -25,6 +25,7 @@ export default class DB{
                         this[i] = JSON.parse(data);
                     }catch(err){
                         console.error("Field "+i+" is supposed to be JSON, but is not. It was ", data, "in", this);
+                        console.log(type, this[i].constructor);
                     }
                 }
                 else if( type === "number" || type === "boolean"  )
