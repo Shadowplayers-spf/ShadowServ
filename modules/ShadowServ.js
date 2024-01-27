@@ -4,7 +4,9 @@ import Multer from 'multer';
 import fs from 'fs';
 
 
-const mul = Multer({dest : 'tmp'}); // Relative to index
+const mul = Multer({dest : 'tmp', limits : {
+    fieldSize : 4*1024*1024 // 4mb
+}}); // Relative to index
 
 export default class ShadowServ{
 	

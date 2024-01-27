@@ -778,6 +778,7 @@ pm.addPage(
             });
         };
 
+        
         // Handle submit
         this._form.onsubmit = async event => {
             event.preventDefault();
@@ -1013,6 +1014,10 @@ pm.addPage(
     // onBuild
     async function( id ){
         
+        // handle webcam pictures
+        this._canvas = null;
+        this._inputs.image.type = "file";
+
         const dom = this.getDom();
         id = Math.trunc(id);
         // Fields that can be loaded directly by value
@@ -1095,6 +1100,13 @@ pm.addPage(
                 this._inputs.barcode.value = data.code;
             });
         };
+        this._inputs.useWebcam.onclick = event => {
+            scanner.run(pm, data => {
+                this._canvas = data;
+                this._inputs.image.type = "hidden";                
+            }, true);
+        };
+
 
         // Handle submit
         this._form.onsubmit = async event => {
@@ -1113,7 +1125,21 @@ pm.addPage(
             jData.owner = Math.trunc(spanOwner.dataset.id);
 
             // formdata includes file and args
-            out.append('file', this._inputs.image.files[0]);
+            if( this._inputs.image.type !== "hidden" )
+                out.append('file', this._inputs.image.files[0]);
+            else{
+
+                await new Promise((res, rej) => {
+                    this._canvas.toBlob(blob => {
+                        out.append("file", blob, "webcam.png");
+                        res();
+                    });
+                });
+
+            }
+                
+            
+            console.log(jData.imgURL);
             out.append("args", JSON.stringify([id, jData]));
 
             this._submit.value = 'Sparar...';

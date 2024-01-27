@@ -8,6 +8,7 @@ export default class Scanner{
 		this.context = null;
 		this.video = null;
 		this.init = false;
+		this._onKeydown = event => {};
 
 	}
 
@@ -38,13 +39,15 @@ export default class Scanner{
 	async close(){
 
 		console.log("Close");
+		document.body.removeEventListener("keydown", this._onKeydown);
 		this.enabled = false;
 		this.video.srcObject.getTracks().forEach(track => {
 			if( track.readyState === "live" )
 				track.stop();
 		});
-		Quagga.stop();
-
+		try{
+			Quagga.stop();
+		}catch(err){} // not nice, but fuckit
 	}
 
 	frame(){
@@ -64,13 +67,15 @@ export default class Scanner{
 	onDetected( data ){
 
 		pm.setModal(); // Closes out quagga
-		this._onDetected(data.codeResult);
+		this._onDetected(data.codeResult || data);
 
 	}
 
-	async run( pm, onDetected ){
+	// scanImage can be set to true to disable quagga and enable space key to call onDetected
+	// 
+	async run( pm, onDetected, scanImage = false ){
 
-		
+		document.body.removeEventListener("keydown", this._onKeydown);
 		const video = document.createElement('video');
 		this.video = video;
 		video.classList.add("hidden");
@@ -92,29 +97,46 @@ export default class Scanner{
 		this.enabled = true;
 		this.frame();
 
-		Quagga.init({
-			inputStream : {
-				name : 'Live',
-				type : 'LiveStream',
-				target : canvas
+		if( !scanImage ){
+
+			Quagga.init({
+				inputStream : {
+					name : 'Live',
+					type : 'LiveStream',
+					target : canvas
+				},
+				decoder : {
+					readers : [
+						"ean_reader"
+					]
+				}
 			},
-			decoder : {
-				readers : [
-					"ean_reader"
-				]
-			}
-		},
-		err =>{
-			if( err ){
-				console.error(err);
-				return;
-			}
-			console.log("Quagga initialized");
-			Quagga.start();
-		});
-		
+			err =>{
+				if( err ){
+					console.error(err);
+					return;
+				}
+				console.log("Quagga initialized");
+				Quagga.start();
+			});
+			
+		}
+		else{
+
+			this._onKeydown = event => {
+
+				if( event.key !== " " )
+					return;
+				event.preventDefault();
+				this.onDetected(canvas);
+
+			};
+			document.body.addEventListener('keydown', this._onKeydown);
+
+		}
 		this._onDetected = onDetected;
-		if( !this.init ){
+
+		if( !this.init && scanImage ){
 
 			this.init = true;
 			Quagga.onDetected(this.onDetected.bind(this));

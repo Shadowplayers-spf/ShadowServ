@@ -10,6 +10,7 @@ import InventoryLoanLog from './modules/InventoryLoanLog.js';
 import config from './config.js';
 import AdminLog from './modules/AdminLog.js';
 
+
 export default class Rest{
 
     constructor( server, req = {} ){
@@ -451,10 +452,14 @@ export default class Rest{
         }
 
         // Handle image upload after making sure it's inserted
-        if( this.files[0] ){
-            
+        let file;
+        if( this.files[0] )
+            file = this.files[0].path;
+        else if( data.imgURL )
+            file = new ArrayBuffer(data.imgURL, "base64");
+        if( file ){
             try{
-                await sharp(this.files[0].path)
+                await sharp(file)
                 .resize({
                     width:512,
                     height:512,
@@ -516,11 +521,16 @@ export default class Rest{
         }catch(err){
             console.error("Failed to create admin log", err);
         }
+
+
+        let file;
+        if( this.files[0] )
+            file = this.files[0].path;
         // Handle image upload after making sure it's inserted
-        if( this.files[0] ){
+        if( file ){
             
             try{
-                await sharp(this.files[0].path)
+                await sharp(file)
                 .resize({
                     width:512,
                     height:512,
