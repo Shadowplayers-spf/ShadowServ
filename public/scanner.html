@@ -25,22 +25,30 @@
 			<p><strong>Scanna ditt kort för att logga in.</strong><br />Har du inte fått ett shadowplayers-kort? Fråga en av våra styrelsemedlemmar!</p>
 		</div>
 		<div class="page hidden" data-id="user">
-			<h1 class="username">Inloggad!</h1>
-			<p>Du har för närvarande <em class="credits">0</em> kr att handla för!</p>
-			<p><strong>Scanna en produkt för att köpa den!</strong></p>
-			<p>När du swishat in pengar (eller betalat kontant) måste du lägga till beloppet här. Notera att stickprov kan förekomma.</p>
-			<form id="add-credits">
-				<input type="number" name="amount" placeholder="Belopp" required />
-				<input type="submit" value="Jag har swishat!" />
-			</form>
-			<input type="button" value="Logga Ut" class="logout" />
+			<div class="main">
+				<h1 class="username">Inloggad!</h1>
+				<p>Du har för närvarande <em class="credits">0</em> kr att handla för!</p>
+				<p><strong>Scanna en produkt för att köpa den!</strong></p>
+				<p>När du swishat in pengar (eller betalat kontant) måste du lägga till beloppet här. Notera att stickprov kan förekomma.</p>
+				<form id="add-credits">
+					<input type="number" name="amount" placeholder="Belopp" required />
+					<input type="submit" value="Jag har swishat!" />
+				</form>
+				<br />
+				<input type="button" value="Logga Ut" class="logout" />
+			</div>
+			<div class="log">Att göra: Logg över inköp</div>
 		</div>
 	</div>
-	<div id="purchaseSuccess">
-		<div class="image"></div>
-		<div>
-			<h1>Du har köpt <span class="product"></span> för <span class="price"></span> kr!</h1>
-			<p>Tack för att du stöder ShadowPlayers genom att handla i våran kiosk!</p>
+	<div id="purchaseSuccess" class="hidden">
+		<div class="content">
+			<div class="bg" style="background-image: url('/media/uploads/shop/1.jpg');"></div>
+			<div class="items">
+				<p>Du har köpt</p>
+				<h1><span class="product">Test</span>!</h1>
+				<p><span class="price">15</span> kr</p>
+				<p>Tack för att du stöder Shadowplayers!</p>
+			</div>
 		</div>
 	</div>
 	<div id="alert" class="hidden">Alert Text</div>

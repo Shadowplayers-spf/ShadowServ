@@ -1,5 +1,6 @@
 import Rest from "../classes/Rest.js";
 import User from "../classes/User.js";
+import ShopItem from "../classes/ShopItem.js";
 
 let password = '';
 
@@ -12,6 +13,7 @@ export default class Scanner{
 	timer_autoLogout = null;
 	timer_scanRst = null;
 	timer_err = null;
+	timer_purchase = null;
 
 	initRest( task, args = []){
 		return new Rest(task, args, {
@@ -179,6 +181,9 @@ export default class Scanner{
 
 	async makePurchase( barcode ){
 
+		clearTimeout(this.timer_purchase);
+		document.querySelector("#purchaseSuccess").classList.toggle("hidden", true);
+
 		const rest = this.initRest("MakePurchase", [this.user.card, barcode]);
 		const out = await rest.run();
 		if( out ){
@@ -186,9 +191,17 @@ export default class Scanner{
 			this.user.shop_credit = out.shop_credit;
 			this.refreshUserTimeout();
 			this.drawUser();
+			const asset = new ShopItem(out.asset);
 
-			console.log("Out", out);
-			console.log("Todo: Show purchased item: ", out.asset);
+			document.querySelector("#purchaseSuccess span.product").innerText = asset.name;
+			document.querySelector("#purchaseSuccess span.price").innerText = asset.cost/100;
+			document.querySelector("#purchaseSuccess > div.content").style.backgroundImage = `url(${asset.getImage()})`;
+			document.querySelector("#purchaseSuccess").classList.toggle("hidden", false);
+
+			this.timer_purchase = setTimeout(() => {
+				document.querySelector("#purchaseSuccess").classList.toggle("hidden", true);
+			}, 6e3);
+
 
 		}
 
@@ -198,7 +211,7 @@ export default class Scanner{
 		
 		amount = Math.trunc(amount);
 		if( amount < 1 ){
-			return;
+			throw new Error("Felaktig summa.");
 		}
 		const rest = this.initRest("AddCredits", [this.user.card, amount]);
 		const out = await rest.run();

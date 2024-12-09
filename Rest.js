@@ -87,58 +87,39 @@ export default class Rest{
         }
         else{
     
-            // Public tasks
-            let fn = "pub"+task;
-            if( typeof this[fn] === "function" )
-                return await this[fn].call(this, ...args);
-            
-            // Logged in tasks
-            fn = "pvt"+task;
-            if( typeof this[fn] === "function" ){
-        try{
-            // Public tasks
-            let fn = "pub"+task;
-            if( typeof this[fn] === "function" ){
-                return await this[fn].call(this, ...args);
+            try{
+                // Public tasks
+                let fn = "pub"+task;
+                if( typeof this[fn] === "function" )
+                    return await this[fn].call(this, ...args);
+                
+                // Logged in tasks
+                fn = "pvt"+task;
+                if( typeof this[fn] === "function" ){
+
+                    if( !this.user.isLoggedIn() ){
+                        throw new Error("Access denied");
+                    }
+                    return await this[fn].call(this, ...args);
+
+                }
+
+                // Admin tasks
+                fn = "adm"+task;
+                if( typeof this[fn] === "function" ){
+
+                    if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
+                        throw new Error("Access denied");
+                    }
+                    return await this[fn].call(this, ...args);
+
+                }
+
             }
-            
-            // Logged in tasks
-            fn = "pvt"+task;
-            if( typeof this[fn] === "function" ){
-
-                if( !this.user.isLoggedIn() ){
-                    throw new Error("Access denied");
-                }
-                return await this[fn].call(this, ...args);
-                if( !this.user.isLoggedIn() ){
-                    throw new Error("Access denied");
-                }
-                return await this[fn].call(this, ...args);
-
-            }
-            }
-
-            // Admin tasks
-            fn = "adm"+task;
-            if( typeof this[fn] === "function" ){
-            // Admin tasks
-            fn = "adm"+task;
-            if( typeof this[fn] === "function" ){
-
-                if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
-                    throw new Error("Access denied");
-                }
-                return await this[fn].call(this, ...args);
-                if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
-                    throw new Error("Access denied");
-                }
-                return await this[fn].call(this, ...args);
-
+            catch( err ){
+                throw err; // rethrow because async
             }
         }
-        catch( err ){
-            throw err; // rethrow because async
-        }       
 
         throw new Error("Task invalid: "+task);
 

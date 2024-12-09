@@ -7,9 +7,13 @@
 p{
 	font-size:1.5vmax;
 	line-height: 150%;
+	pointer-events: none;
+	user-select: none;
 }
 h1{
-	margin:0.5vmax
+	margin:0.5vmax;
+	pointer-events: none;
+	user-select: none;
 }
 
 /* Pages */
@@ -27,12 +31,17 @@ h1{
 		border-bottom-right-radius: var(--radius-default);
 	}
 
-	div.page[data-id=user]{
+	div.page[data-id=user]  > div{
 		background:rgba(0,50,0,0.75);
 		border:0.2vmax solid var(--color-bright-green);
 		padding:2vmax;
 		border-top-left-radius: var(--radius-default);
 		border-bottom-right-radius: var(--radius-default);
+	}
+	div.page[data-id=user]  > div.log{
+		margin-top:1vmax;
+		border-color:#EEE;
+		background:rgba(50,50,50,0.5);
 	}
 	div.page[data-id=user] em.credits{
 		color:var(--color-bright-green);
@@ -46,12 +55,22 @@ h1{
 		from{ box-shadow: 0 0 2vmax rgba(0,0,0,0.5); }
 		to{ box-shadow: 0 0 2vmax rgba(0,0,0,1); }
 	}
-	#alert.hidden{
+	#alert.hidden, #purchaseSuccess.hidden > div.content{
 		display:block !important;
 		transform:translateX(-50%) scale(0);
 		opacity:0;
 	}
-	#alert{
+	#purchaseSuccess.hidden > div.content{
+		transform:translate(-50%, -50%) scale(0%);
+	}
+	#purchaseSuccess.hidden > div.content > div.bg{
+		animation:none;
+	}
+	#purchaseSuccess.hidden{
+		display:block !important;
+		opacity:0;
+	}
+	#alert, #purchaseSuccess > div.content{
 		transition: all 200ms ease-in-out;
 		position: fixed;
 		left: 50%;
@@ -68,3 +87,61 @@ h1{
 		animation: alertShadow 1s ease-in-out alternate infinite;
 		pointer-events: none;
 	}
+	@keyframes purchaseShadow{
+		from{ box-shadow: 0 0 2vmax rgba(100,255,100,0.5); }
+		to{ box-shadow: 0 0 2vmax rgba(100,255,100,1); }
+	}
+	#purchaseSuccess{
+		transition: opacity 200ms ease-in-out;
+		position: fixed;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background: rgba(0,0,0,.75);
+		pointer-events: none;
+	}
+	#purchaseSuccess > div.content{
+		background:#111;
+		border-color: var(--color-bright-green);
+		text-align: center;
+		color: #EEE;
+		animation: purchaseShadow 1s ease-in-out alternate infinite;
+		top:50%;
+		transform:translate(-50%, -50%);
+		background-size: cover;
+		background-position: center;
+		padding:0;
+		overflow:hidden;
+		width:55%;
+		display:flex;
+		font-weight: normal;
+	}
+	#purchaseSuccess span{
+		color: var(--color-bright-green);
+	}
+	#purchaseSuccess > div.content > div.items{
+		backdrop-filter: blur(5px);
+		background:rgba(0,0,0,.75);
+		width:100%;
+		padding:3vmax;
+	}
+	@keyframes purchaseBG{
+		from{ left: -20%; }
+		to{ left: 0%;}
+	}
+	#purchaseSuccess > div.content > div.bg{
+		position: absolute;
+		top:0%; left:-10%;
+		width:120%; height:100%;
+		left:-20%;
+		background-size: cover;
+		background-position: center;
+		animation: purchaseBG 8s forwards linear;
+	}
+	#purchaseSuccess p{
+		margin:0;
+	}
+	#purchaseSuccess h1{
+		margin:0;
+		color: #EEE;
+		font-size:3vmax;
+	}
+
