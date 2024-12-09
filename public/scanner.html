@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowplayers Scanner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_scanner.css">
+</head>
+<body>
+	<div id="bg"></div>
+	<div id="logo"></div>
+	<div id="pages">
+		<!-- Login -->
+		<div class="page" data-id="login">
+			<form id="login">
+				<input type="text" class="hidden" hidden name="username" name="username" value="scanner" autocomplete="username" />
+				<input type="password" name="password" placeholder="Lösenord" autocomplete="current-password" required />
+				<input type="submit" value="Logga In Scanner" />
+			</form>
+		</div>
+		<!-- Main -->
+		<div class="page hidden" data-id="main">
+			<h1>Kiosklistan</h1>
+			<p><strong>Scanna ditt kort för att logga in.</strong><br />Har du inte fått ett shadowplayers-kort? Fråga en av våra styrelsemedlemmar!</p>
+		</div>
+		<div class="page hidden" data-id="user">
+			<h1 class="username">Inloggad!</h1>
+			<p>Du har för närvarande <em class="credits">0</em> kr att handla för!</p>
+			<p><strong>Scanna en produkt för att köpa den!</strong></p>
+			<p>När du swishat in pengar (eller betalat kontant) måste du lägga till beloppet här. Notera att stickprov kan förekomma.</p>
+			<form id="add-credits">
+				<input type="number" name="amount" placeholder="Belopp" required />
+				<input type="submit" value="Jag har swishat!" />
+			</form>
+			<input type="button" value="Logga Ut" class="logout" />
+		</div>
+	</div>
+	<div id="purchaseSuccess">
+		<div class="image"></div>
+		<div>
+			<h1>Du har köpt <span class="product"></span> för <span class="price"></span> kr!</h1>
+			<p>Tack för att du stöder ShadowPlayers genom att handla i våran kiosk!</p>
+		</div>
+	</div>
+	<div id="alert" class="hidden">Alert Text</div>
+	<script type="module">
+		import Scanner from './classes_scanner/Scanner.js';
+		window.scanner = new Scanner();
+		window.scanner.begin();
+	</script>
+</body>
+</html>
