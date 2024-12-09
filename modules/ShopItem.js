@@ -1,7 +1,7 @@
 import DB from "./DB.js";
 
 
-export class ShopItem extends DB{
+export default class ShopItem extends DB{
 
     static table = "shop_items";
 
@@ -53,6 +53,10 @@ export class ShopItem extends DB{
         }
         return out;
 
+    }
+
+    canBeSold(){
+        return this.active && this.cost > 0;
     }
 
     // Makes sure we don't write bogus values to DB.

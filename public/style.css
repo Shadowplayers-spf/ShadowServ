@@ -26,6 +26,7 @@
         --color-dark-red: #611;
         --color-noticebox-green: rgba(200,255,200,0.75);
         --bg-gradient-green: linear-gradient(to bottom, rgba(229,252,188,1) 0%,rgba(153,248,0,1) 98%);
+        --bg-gradient-red: linear-gradient(to bottom, rgba(252,187,187,1) 0%,rgba(248,100,100,1) 98%);
         
     }
 
@@ -283,7 +284,7 @@
         border: var(--color-cyberpunk) 1px solid;
         box-shadow: var(--shadow-default);
         border-top-right-radius: var(--radius-default);
-        overflow:visible;
+        overflow:auto;
     }
     #modal{
         left:0; right:0;

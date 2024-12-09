@@ -2,7 +2,7 @@ import User from './modules/User.js';
 import Swish from './modules/Swish.js';
 import SwishTransaction from './modules/SwishTransaction.js';
 import DB from './modules/DB.js';
-import { ShopItem } from './modules/ShopItem.js';
+import ShopItem from './modules/ShopItem.js';
 import ShopTransaction from './modules/ShopTransaction.js';
 import sharp from 'sharp';
 import Inventory from './modules/Inventory.js';
@@ -10,6 +10,10 @@ import InventoryLoanLog from './modules/InventoryLoanLog.js';
 import config from './config.js';
 import AdminLog from './modules/AdminLog.js';
 
+import Etc from './modules/Etc.js';
+import Bcrypt from 'bcrypt';
+import Crypto from 'crypto';
+import ScannerTransaction from './modules/ScannerTransaction.js';
 
 export default class Rest{
 
@@ -19,6 +23,8 @@ export default class Rest{
         this.server = server;
         this.body = req.body;
         this.user = new User();
+        this.isScanner = false;
+
         const ct = String(req?.headers?.["content-type"]);
 
         // multipart/form-data is used for requests with a file. In that request, args are a string and need to be JSON parsed
@@ -52,7 +58,43 @@ export default class Rest{
         ;
         if( !Array.isArray(args) )
             args = [args];
+
+
+        // When We're running as a scanner, body.scanner is the token, and is always sent
+        if( this.body.scanner !== undefined ){
+
+            // Validate scanner
+
+            // Login in the only one that doesn't need to check token
+            if( task !== 'Login' ){
+
+                const cur = await Etc.get({label : 'scanner_token'}, 1);
+				if( !cur || cur.data !== this.body.scanner ){
+					
+					if( task === 'ValidateToken' )
+						return false;
+
+					throw new Error("Sessionen har gått ut. Logga in igen!");
+				}
+
+            }
+
+            this.isScanner = true;
+            let fn = 'scan'+task;
+            if( typeof this[fn] === "function" )
+                return await this[fn].call(this, ...args);
+
+        }
+        else{
     
+            // Public tasks
+            let fn = "pub"+task;
+            if( typeof this[fn] === "function" )
+                return await this[fn].call(this, ...args);
+            
+            // Logged in tasks
+            fn = "pvt"+task;
+            if( typeof this[fn] === "function" ){
         try{
             // Public tasks
             let fn = "pub"+task;
@@ -68,13 +110,25 @@ export default class Rest{
                     throw new Error("Access denied");
                 }
                 return await this[fn].call(this, ...args);
+                if( !this.user.isLoggedIn() ){
+                    throw new Error("Access denied");
+                }
+                return await this[fn].call(this, ...args);
 
+            }
             }
 
             // Admin tasks
             fn = "adm"+task;
             if( typeof this[fn] === "function" ){
+            // Admin tasks
+            fn = "adm"+task;
+            if( typeof this[fn] === "function" ){
 
+                if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
+                    throw new Error("Access denied");
+                }
+                return await this[fn].call(this, ...args);
                 if( !this.user.isLoggedIn() || !this.user.isAdmin() ){
                     throw new Error("Access denied");
                 }
@@ -591,7 +645,7 @@ export default class Rest{
         const user = await User.get({deleted:0, id:userid}, 1);
         if( !user || !user.exists() )
             throw new Error("User not found");
-        if( user.privilege >= this.user.privilege )
+        if( user.privilege >= this.user.privilege && user.id !== this.user.id )
             throw new Error("Can't edit user with equal or higher privilege");
         
         const pre = new User(user);
@@ -665,6 +719,76 @@ export default class Rest{
         return out;
 
     }
+
+    /* Scanner endpoints */
+    // Returns a token on success
+    async scanLogin( password ){
+
+        let pw = await Etc.get({label:'scanner_password'}, 1);
+
+        if( !await Bcrypt.compare(String(password), String(pw.data)) )
+            throw new Error("Invalid scanner password.");
+
+		const bytes = await Crypto.randomBytes(48);
+        const token = bytes.toString('hex');
+        await Etc.set('scanner_token', token);
+		return token;
+
+    }
+
+    async scanGetUser( cardId ){
+
+        const user = await User.get({card:cardId}, 1);
+        if( !user || !user.exists() )
+            throw new Error("Användaren hittades inte, be en administratör att registrera dig.");
+
+        return {
+            card : user.card,
+            shop_credit : user.shop_credit,
+        };
+
+    }
+
+	// Returns true, because you have to be logged in as scanner to reach this
+	async scanValidateToken(){
+		return true;
+	}
+
+    // Adds credits, returns the updated balance
+    async scanAddCredits( cardId, amount ){
+
+        const user = await User.get({card:cardId}, 1);
+        const out = await ScannerTransaction.create(user, amount*100, 0);
+        return {
+            shop_credit : out,
+        };
+
+    }
+
+    // Makes a purchase, returns the updated balance and item information
+    async scanMakePurchase( cardId, barcode ){
+
+        const user = await User.get({card:cardId}, 1);
+        const asset = await ShopItem.get({barcode}, 1);
+        if( !user || !user.exists() )
+            throw new Error("Användaren hittades inte, be en administratör att registrera dig.");
+        if( !asset || !asset.exists() )
+            throw new Error("Produkten hittades inte, be en administratör om hjälp.");
+        // Sanity check the purchase
+        if( asset.cost > user.shop_credit )
+            throw new Error("Du har inte tillräckligt med kredit. Swisha in och lägg till nedan!");
+        if( !asset.canBeSold() )
+            throw new Error("Felaktig produkt, försök igen.");
+
+        const out = await ScannerTransaction.create(user, -asset.cost, asset);
+        const assetData = await asset.getOut();
+        return {
+            asset : assetData,
+            shop_credit : out
+        };
+
+    }
+
 
 }
 

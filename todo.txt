@@ -1,11 +1,27 @@
-- Testa
-- Fixa riktig swish
+- Swish funkar inte (förmodligen certifikatfel)
+- Admin log
+- Kolla hur det gäller med swish om man kan ha ett certifikat enbart för att ta emot pengar
+- Backups?
+- Ska registreringen vara privat eller offentlig?
 
-- Add num players to front end
-- Add play time to front end
+- Offline/App:
+	x Add webmanifest.
+	x Create logos
+	x Serviceworker :: Need cache
 
-- Proper serviceworker
 - Put swish online
 - Discord/app/ebas sync?
 - Backups
 	- ???
+- Hosting
+	- ???
+
+
+:: Kiosklista ::
+- Logga in användare genom att scanna ett nummer.
+- Lägg till så man kan swisha in pengar.
+	- Max/min belopp
+- Lägg till så man kan handla produkter
+	- Måste kolla om produkten är aktiv, och har ett pris
+	- Logga
+

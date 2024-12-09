@@ -546,6 +546,7 @@ pm.addPage(
             if( !user )
                 return;         
 
+
             const wrap = this.make("div");
             const form = this.make("form", "", ["userEdit"], wrap);
 
@@ -565,6 +566,14 @@ pm.addPage(
             const discord = this.make("input", "", [], form);
             discord.name = "discord";
             discord.value = user.discord;
+
+            this.make("p", "SP-Kort ID", [], form);
+            const card = this.make("input", "", [], form);
+            card.type = 'number';
+            card.step = 1;
+            card.min = 0;
+            card.name = "card";
+            card.value = user.card;
             
             this.make("p", "Kiosk-kredit (öre)", [], form);
             const shopCredit = this.make("input", "", [], form);
@@ -611,7 +620,8 @@ pm.addPage(
                     nick : nick.value,
                     member : +member.checked,
                     discord : discord.value,
-                    shop_credit : Math.trunc(shopCredit.value)
+                    shop_credit : Math.trunc(shopCredit.value),
+                    card : card.value
                 };
                 if( pm.user.privilege > 10 )
                     uData.privilege = privilege.value;
@@ -671,6 +681,8 @@ pm.addPage(
             this.make("td", user.member, [], tr);
             this.make("td", user.discord, [], tr);
             this.make("td", user.shop_credit/100, [], tr);
+            this.make("td", user.card, [], tr);
+
             
         }
         tableUsers.replaceChildren(...rows);
@@ -803,6 +815,13 @@ pm.addPage(
                 pm.setPage("storeEdit/"+ret.id);
             this._submit.value = 'Spara';
             
+        };
+
+        this._inputs.barcode.onkeydown = event => {
+            if( event.key === "Enter" ){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
         };
 
         

@@ -5,7 +5,7 @@ import Ebas from './modules/Ebas.js';
 import DB from './modules/DB.js';
 import Swish from './modules/Swish.js';
 import UnitTests from './unit_tests.js';
-import { ShopItem } from './modules/ShopItem.js';
+import ShopItem from './modules/ShopItem.js';
 
 (async () => {
     
@@ -25,15 +25,16 @@ import { ShopItem } from './modules/ShopItem.js';
 
 
     /* Unit tests*/
+    /*
     UnitTests.setServer(server);
     UnitTests.setRestToken('9a0acbedfe7b5fd40d65fb16d249cec4ef9e733ccc063355025dc60c56eca11e07ff7d03f675f1ebf58e3ea368833804'); // Set to login token of user you want to test
-
+    
     // Create a swish transaction
     //UnitTests.run('createSwishTransaction', [100, '46709802111']);
     
     // Get user data
     await UnitTests.run('getUser');
-
+*/
     // Refresh a swish transaction for a user
     //await UnitTests.run('refreshTransactions');
     

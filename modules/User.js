@@ -17,6 +17,7 @@ export default class User extends DB{
         this.session_token = "";
         this.session_token_generated = 0;
         this.shop_credit = 0;       // Hela ören
+        this.card = 0;
 
         this.load(data);
     }
@@ -34,6 +35,7 @@ export default class User extends DB{
             out.member = this.member;
             out.session_token = this.session_token;
             out.shop_credit = this.shop_credit;
+            out.card = this.card;
         }
         return out;
 
@@ -93,6 +95,13 @@ export default class User extends DB{
             throw new Error("Insufficient funds in shop credit subtract.");
         
         this.shop_credit -= credit;
+
+    }
+
+    async refreshShopCredit( transaction = undefined ){
+        
+        const q = await this.query("SELECT shop_credit FROM "+this.constructor.table+" WHERE id=?", [this.id], transaction);
+        this.shop_credit = q[0].shop_credit;
 
     }
 
@@ -217,6 +226,8 @@ export default class User extends DB{
             this.privilege = data.privilege;
 
         }
+        if( data.hasOwnProperty("card") )
+            this.card = Math.trunc(data.card) || 0;
         if( data.hasOwnProperty("member") )
             this.member = Math.trunc(data.member) || 0;
         if( data.hasOwnProperty("discord") )
@@ -230,8 +241,8 @@ export default class User extends DB{
 
         }
 
-        await this.query("UPDATE "+this.constructor.table+" SET nick=?, privilege=?, member=?, discord=?, shop_credit=? WHERE id=?", [
-            this.nick, this.privilege, this.member, this.discord, this.shop_credit, this.id
+        await this.query("UPDATE "+this.constructor.table+" SET nick=?, privilege=?, member=?, discord=?, shop_credit=?, card=? WHERE id=?", [
+            this.nick, this.privilege, this.member, this.discord, this.shop_credit, this.card, this.id
         ]);
         
     }
