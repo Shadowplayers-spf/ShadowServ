@@ -15,6 +15,7 @@ export default class ScannerTransaction extends DB{
 		this.amount = 0; 			// ören, negativt vid inköp, positivt vid försäljning
 		this.balance_after = 0; 	// User balance after transaction
 		this.product = 0;			// Product ID
+		this.product_name = '';
 
         this.load(...arguments);
 
@@ -28,17 +29,34 @@ export default class ScannerTransaction extends DB{
 			date : this.date,
 			amount : this.amount,
 			balance_after : this.balance_after,
-			product : this.product
+			product : this.product,
+			product_name : this.product_name,
         };
         return out;
 
     }
 
+	static async getByUser( user, limit = 100 ){
+
+		let query = "SELECT * FROM "+ScannerTransaction.table+" WHERE user=? ORDER BY date DESC";
+		const params = [user.id];
+		if( limit > 0 ){
+			query += " LIMIT ?";
+			params.push(limit);
+		}
+
+		const rows = await this.query(query, params);
+		return rows.map(el => new this(el));
+
+	}
+
 	// returns remaining credit on success. Product is only needed on subtract
 	static async create( user, amount, product ){
+		
 		// Add shop credit doesn't need a product
 		if( amount > 0 )
 			product = 0;
+		
 		if( !(user instanceof User) )
 			throw new Error("Expected user object in ScannerTransaction.");
 		if( amount < 0 && !(product instanceof ShopItem) )
@@ -47,6 +65,10 @@ export default class ScannerTransaction extends DB{
 			throw new Error("Expected numeric amount in ScannerTransaction.");
 		if( Math.trunc(amount) !== amount )
 			throw new Error("Expected integer amount in ScannerTransaction.");
+
+		let productName = 'SWISH';
+		if( product instanceof ShopItem )
+			productName = product.name;
 
 		const conn = await DB.getTransactionConnection();
 		try{
@@ -57,8 +79,8 @@ export default class ScannerTransaction extends DB{
 				await user.addShopCredit(amount, conn);
 			
 			// Insert one of these
-			await this.query("INSERT INTO "+ScannerTransaction.table+" (user, amount, product, balance_after) VALUES (?,?,?,?)", [
-				user.id, amount, (product ? product.id : 0), user.shop_credit
+			await this.query("INSERT INTO "+ScannerTransaction.table+" (user, amount, product, balance_after, product_name) VALUES (?,?,?,?,?)", [
+				user.id, amount, (product ? product.id : 0), user.shop_credit, productName
 			], conn);
 			await DB.finalizeTransaction(conn); // Finalizes and releases
 			

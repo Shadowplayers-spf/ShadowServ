@@ -15,8 +15,8 @@
 		<div class="page" data-id="login">
 			<form id="login">
 				<input type="text" class="hidden" hidden name="username" name="username" value="scanner" autocomplete="username" />
-				<input type="password" name="password" placeholder="Lösenord" autocomplete="current-password" required />
-				<input type="submit" value="Logga In Scanner" />
+				<input type="password" name="password" class="defaultFont" placeholder="Lösenord" autocomplete="current-password" required />
+				<input type="submit" class="defaultFont" value="Logga In Scanner" />
 			</form>
 		</div>
 		<!-- Main -->
@@ -27,17 +27,37 @@
 		<div class="page hidden" data-id="user">
 			<div class="main">
 				<h1 class="username">Inloggad!</h1>
-				<p>Du har för närvarande <em class="credits">0</em> kr att handla för!</p>
-				<p><strong>Scanna en produkt för att köpa den!</strong></p>
-				<p>När du swishat in pengar (eller betalat kontant) måste du lägga till beloppet här. Notera att stickprov kan förekomma.</p>
+				<p class="credits">Du har för närvarande <em class="credits">0</em> kr att handla för!</p>
+				<p class="brightGreen"><strong>Scanna en produkt för att köpa den!</strong></p>
+				<p class="italic">När du swishat in pengar måste du lägga till beloppet nedan. Notera att stickprov kan förekomma.</p>
 				<form id="add-credits">
-					<input type="number" name="amount" placeholder="Belopp" required />
-					<input type="submit" value="Jag har swishat!" />
+					<input type="number" class="defaultFont" name="amount" placeholder="Belopp" required />
+					<input type="submit" class="defaultFont" value="Jag har swishat!" />
 				</form>
 				<br />
-				<input type="button" value="Logga Ut" class="logout" />
+				<input type="button" value="Logga Ut" class="logout defaultFont" />
 			</div>
-			<div class="log">Att göra: Logg över inköp</div>
+			<div class="log">
+				<h1>Senaste Händelser</h1>
+				<table class="logItems">
+					<thead>
+						<tr>
+							<th>Datum</th>
+							<th>Produkt</th>
+							<th>Belopp</th>
+							<th>Saldo</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>2021-01-01</td>
+							<td>Test</td>
+							<td>15</td>
+							<td>15</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 	<div id="purchaseSuccess" class="hidden">
@@ -46,8 +66,8 @@
 			<div class="items">
 				<p>Du har köpt</p>
 				<h1><span class="product">Test</span>!</h1>
-				<p><span class="price">15</span> kr</p>
-				<p>Tack för att du stöder Shadowplayers!</p>
+				<p class="price"><span class="price">15</span> kr</p>
+				<p class="subtitle">Tack för att du stöder Shadowplayers!</p>
 			</div>
 		</div>
 	</div>

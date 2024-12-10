@@ -2,10 +2,11 @@
 	position: fixed;
 	left:0; right:0;
 	top:0; bottom:0;
+	overflow:auto;
 }
 
 p{
-	font-size:1.5vmax;
+	font-size:2.5vmax;
 	line-height: 150%;
 	pointer-events: none;
 	user-select: none;
@@ -14,6 +15,13 @@ h1{
 	margin:0.5vmax;
 	pointer-events: none;
 	user-select: none;
+}
+p.brightGreen{
+	color: var(--color-bright-green);
+}
+
+input{
+	font-size: 3vmax;
 }
 
 /* Pages */
@@ -31,6 +39,21 @@ h1{
 		border-bottom-right-radius: var(--radius-default);
 	}
 
+	div.page[data-id=main] h1{
+		font-size: 10vmax;
+	}
+	div.page[data-id=main] p{
+		font-size: 3vmax;
+	}
+	
+
+	div.page[data-id=user]{
+		width:80%;
+		left: 50%;
+		margin-top: 5vh;
+		top:auto;
+		transform:translateX(-50%);
+	}
 	div.page[data-id=user]  > div{
 		background:rgba(0,50,0,0.75);
 		border:0.2vmax solid var(--color-bright-green);
@@ -43,12 +66,53 @@ h1{
 		border-color:#EEE;
 		background:rgba(50,50,50,0.5);
 	}
+	div.page[data-id=user] p.credits{
+		background: var(--color-dark-green);
+		border: 0.2vmax solid var(--color-bright-green);
+		border-top-left-radius: var(--radius-default);
+		border-bottom-right-radius: var(--radius-default);
+		padding:1vmax;
+		font-size: 3vmax;
+		display:inline-block;
+	}
 	div.page[data-id=user] em.credits{
 		color:var(--color-bright-green);
+		font-weight: bold;
 	}
+	
 	div.page[data-id=user] input{
 		display:inline
 	}
+
+	div.page[data-id=user] div.log{
+		margin-bottom:3vh;
+	}
+	div.page[data-id=user] div.log > h1{
+		font-size:4vmax;
+		color:#AAA;
+	}
+	div.page[data-id=user] table{
+		text-align: left;
+	}
+	div.page[data-id=user] table.logItems{
+		font-size:2vmax;
+		width:100%;
+	}
+	div.page[data-id=user] table.logItems th{
+		border-bottom: 1px solid #FFF;
+		font-weight: bold;
+	}
+	
+	div.page[data-id=user] table.logItems td{
+		border-bottom: 1px dotted #EEE;
+	}
+	div.page[data-id=user] table.logItems tr.swish{
+		color: var(--color-bright-green);
+	}
+	div.page[data-id=user] table.logItems tr.purchase{
+		color: var(--color-bright-red);
+	}
+
 
 /* Alert */
 	@keyframes alertShadow{
@@ -110,7 +174,7 @@ h1{
 		background-position: center;
 		padding:0;
 		overflow:hidden;
-		width:55%;
+		width:80%;
 		display:flex;
 		font-weight: normal;
 	}
@@ -138,10 +202,28 @@ h1{
 	}
 	#purchaseSuccess p{
 		margin:0;
+		font-size:4vmax;
+		font-weight: bold;
 	}
+	#purchaseSuccess p.subtitle{
+		font-style: italic;
+		font-weight: normal;
+
+	}
+	#purchaseSuccess p.price{
+		padding:1vmax 2vmax;
+		background: var(--color-dark-green);
+		border-top-left-radius: var(--radius-default);
+		border-bottom-right-radius: var(--radius-default);
+		display: inline-block;
+		border: 0.2vmax solid var(--color-bright-green);
+		
+	}
+
 	#purchaseSuccess h1{
 		margin:0;
 		color: #EEE;
-		font-size:3vmax;
+		font-size:5vmax;
+		text-transform: uppercase;
 	}
 

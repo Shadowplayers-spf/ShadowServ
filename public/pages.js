@@ -74,10 +74,11 @@ pm.addPage(
             const
                 user = dom.querySelector("input[name=username]").value,
                 pass = dom.querySelector("input[name=password]").value,
-                discord = dom.querySelector("input[name=discord]").value
+                discord = dom.querySelector("input[name=discord]").value,
+                card = dom.querySelector("input[name=card]").value
             ;
 
-            const req = await pm.restReq("Register", [user, pass, discord]);
+            const req = await pm.restReq("Register", [user, pass, discord, card]);
             if( req ){
                 //console.log("Setting user and page");
                 //pm.setUser(new User(req));
@@ -86,6 +87,7 @@ pm.addPage(
 
                 dom.querySelector("input[name=username]").value = "";
                 dom.querySelector("input[name=discord]").value = "";
+                dom.querySelector("input[name=card]").value = "";
                 this._resetPassField();
 
             }

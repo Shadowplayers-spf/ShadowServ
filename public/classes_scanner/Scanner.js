@@ -8,16 +8,20 @@ export default class Scanner{
 
 	text = '';
 	userid = 0;
+	logoutSec = 0;
 	page = 'login';
 	user = new User();
 	timer_autoLogout = null;
 	timer_scanRst = null;
 	timer_err = null;
 	timer_purchase = null;
+	
+	// Transaction history
+	transactions = [];
 
 	initRest( task, args = []){
 		return new Rest(task, args, {
-			scanner : localStorage.token
+			scanner : localStorage.token || ''
 		});
 	}
 
@@ -36,14 +40,31 @@ export default class Scanner{
 	}
 
 	refreshUserTimeout(){
-		clearTimeout(this.timer_autoLogout);
-		this.timer_autoLogout = setTimeout(this.logoutUser.bind(this), 600e3);
+
+		clearInterval(this.timer_autoLogout);
+		this.logoutSec = 60*2;
+		this.timer_autoLogout = setInterval(() => {
+			
+			--this.logoutSec;
+			document.querySelector("#pages > div[data-id=user] input.logout").value = 'Logga Ut ['+this.logoutSec+']';
+			if( this.logoutSec <= 0 ){
+				this.logoutUser();
+			}
+
+		}, 1e3);
+
 	}
 
 	logoutUser(){
 		this.user = new User();
-		clearTimeout(this.timer_autoLogout);
+		this.transactions = [];
+		clearInterval(this.timer_autoLogout);
 		this.setPage("main");
+	}
+
+	// Root login
+	onLoggedIn(){
+		//document.querySelector("body").requestFullscreen();
 	}
 
 	async login( pw ){
@@ -56,6 +77,7 @@ export default class Scanner{
 			if( out ){
 				localStorage.token = out;
 				this.setPage("main");
+				this.onLoggedIn();
 			}
 		}catch(err){
 			this.handleError(err);
@@ -75,9 +97,9 @@ export default class Scanner{
 
 			const rest = this.initRest("ValidateToken");
 			const out = await rest.run();
-			console.log("Validate token result", out);
 			if( out ){
 				this.setPage("main");
+				this.onLoggedIn();
 			}
 
 		}
@@ -96,6 +118,7 @@ export default class Scanner{
 		};
 
 		document.querySelector("#pages > div[data-id=user] input.logout").onclick = this.logoutUser.bind(this);
+
 		const swishButton = document.querySelector("#add-credits input[type=submit]");
 		
 		// Add credits
@@ -136,8 +159,9 @@ export default class Scanner{
 			const rest = this.initRest("GetUser", [text]);
 			try{
 
-				const user = await rest.run();
-				this.user = new User(user);
+				const data = await rest.run();
+				this.user = new User(data.user);
+				this.transactions = data.transactions;
 				this.setPage("user");
 
 			}catch(err){
@@ -175,7 +199,42 @@ export default class Scanner{
 	drawUser(){
 
 		document.querySelector("#pages > div[data-id=user] em.credits").innerText = this.user.getCreditSek();
-		
+		let trs = [];
+		for( let transaction of this.transactions ){
+			const tr = document.createElement("tr");
+			trs.push(tr);
+			tr.classList.add(transaction.amount < 0 ? "purchase" : "swish");
+			
+			const date = new Date(transaction.date);
+			const secondsAgo = Math.trunc(new Date().getTime() - date.getTime())/1e3;
+			let label = 'Just Nu';
+			if( secondsAgo > 60 )
+				label = Math.floor(secondsAgo/60) + ' minut'+(Math.floor(secondsAgo/60) > 1 ? 'er' : '')+' sedan';
+			if( secondsAgo > 3600 )
+				label = Math.floor(secondsAgo/3600) + ' timm'+(Math.floor(secondsAgo/3600) > 1 ? 'ar' : 'e')+' sedan';
+			if( secondsAgo > 86400 )
+				label = Math.floor(secondsAgo/86400) + ' dag'+(Math.floor(secondsAgo/86400) > 1 ? 'ar' : '')+' sedan';
+
+			let td = document.createElement("td");
+			td.innerText = label;
+			tr.append(td);
+
+			td = document.createElement("td");
+			td.innerText = transaction.product_name;
+			tr.append(td);
+
+			td = document.createElement("td");
+			td.style.fontStyle = "italic";
+			td.innerText = transaction.amount/100 +" kr";
+			tr.append(td);
+
+			td = document.createElement("td");
+			td.innerText = transaction.balance_after/100 + " kr";
+			tr.append(td);
+
+		}
+
+		document.querySelector("#pages > div[data-id=user] table.logItems tbody").replaceChildren(...trs);
 
 	}
 
@@ -189,6 +248,7 @@ export default class Scanner{
 		if( out ){
 
 			this.user.shop_credit = out.shop_credit;
+			this.transactions = out.transactions;
 			this.refreshUserTimeout();
 			this.drawUser();
 			const asset = new ShopItem(out.asset);
@@ -217,6 +277,7 @@ export default class Scanner{
 		const out = await rest.run();
 		if( out ){
 			this.user.shop_credit = out.shop_credit;
+			this.transactions = out.transactions;
 			this.refreshUserTimeout();
 			this.drawUser();
 			document.querySelector("#add-credits input[name=amount]").value = '';

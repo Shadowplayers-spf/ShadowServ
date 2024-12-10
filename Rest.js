@@ -59,7 +59,6 @@ export default class Rest{
         if( !Array.isArray(args) )
             args = [args];
 
-
         // When We're running as a scanner, body.scanner is the token, and is always sent
         if( this.body.scanner !== undefined ){
 
@@ -685,7 +684,7 @@ export default class Rest{
     /*
     
     */
-    async admRegister( nick, password, discord = "" ){
+    async admRegister( nick, password, discord = "", card = "" ){
 
         nick = String(nick).trim();
         password = String(password);
@@ -694,7 +693,7 @@ export default class Rest{
         const user = new User();
 
         // The rest is handled by User
-        await user.register(nick, password, discord);
+        await user.register(nick, password, discord, card);
 
         const out = await this.user.getOut(true);
         return out;
@@ -717,15 +716,27 @@ export default class Rest{
 
     }
 
+    async helperGetUserTransactionsOut( user, maxNum ){
+
+        const transactions = await ScannerTransaction.getByUser(user, maxNum);
+        const promises = transactions.map(el => el.getOut());
+        return await Promise.all(promises);
+
+    }
+
     async scanGetUser( cardId ){
 
         const user = await User.get({card:cardId}, 1);
         if( !user || !user.exists() )
             throw new Error("Användaren hittades inte, be en administratör att registrera dig.");
 
+        const transactions = await this.helperGetUserTransactionsOut(user);
         return {
-            card : user.card,
-            shop_credit : user.shop_credit,
+            user : {
+                card : user.card,
+                shop_credit : user.shop_credit,
+            },
+            transactions,
         };
 
     }
@@ -740,8 +751,10 @@ export default class Rest{
 
         const user = await User.get({card:cardId}, 1);
         const out = await ScannerTransaction.create(user, amount*100, 0);
+        const transactions = await this.helperGetUserTransactionsOut(user);
         return {
             shop_credit : out,
+            transactions,
         };
 
     }
@@ -763,9 +776,11 @@ export default class Rest{
 
         const out = await ScannerTransaction.create(user, -asset.cost, asset);
         const assetData = await asset.getOut();
+        const transactions = await this.helperGetUserTransactionsOut(user);
         return {
             asset : assetData,
-            shop_credit : out
+            shop_credit : out,
+            transactions,
         };
 
     }

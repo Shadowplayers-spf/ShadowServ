@@ -151,7 +151,7 @@ export default class User extends DB{
 
     }
 
-    async register( nick, pass, discord ){
+    async register( nick, pass, discord, card ){
         
         nick = this.validateNick(nick);
 
@@ -160,11 +160,15 @@ export default class User extends DB{
         this.discord = String(discord).substring(0,64);
         this.nick = nick;
         this.password = await this.hashPassword(pass);
+        if( !card || (!isNaN(card) && !Math.trunc(card)) )
+            card = null;
+        this.card = card || 0;
+
         const ex = await User.get({nick}, 1);
         if( ex?.id )
             throw new Error("User already exists");
 
-        const q = await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, discord) VALUES (?,?,?,?,?)", [this.nick, 1, 0, this.password, this.discord]);
+        const q = await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, discord, card) VALUES (?,?,?,?,?,?)", [this.nick, 1, 0, this.password, this.discord, card]);
         this.id = q.insertId;
         if( !this.id )
             return false;
