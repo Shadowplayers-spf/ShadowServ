@@ -66,6 +66,7 @@ export default class Scanner{
 	*/
 	onDetected( data ){
 
+		console.log("OnDetected", data);
 		pm.setModal(); // Closes out quagga
 		this._onDetected(data.codeResult || data);
 
@@ -136,8 +137,9 @@ export default class Scanner{
 		}
 		this._onDetected = onDetected;
 
-		if( !this.init && scanImage ){
+		if( !this.init && !scanImage ){
 
+			console.log("Binding onDetected to quagga");
 			this.init = true;
 			Quagga.onDetected(this.onDetected.bind(this));
 

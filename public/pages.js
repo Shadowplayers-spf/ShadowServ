@@ -909,7 +909,7 @@ pm.addPage(
         newProduct.classList.toggle("hidden", !isAdmin);
 
         let curCat;
-        const rows = [];
+        const rows = [], assetRows = [];
         for( let asset of assets ){
 
             let cat = asset.getTypeSE();
@@ -938,6 +938,7 @@ pm.addPage(
             div.dataset._n = asset.name.toLowerCase();
 
             rows.push(div);
+            assetRows.push(div);
             
             let bg = this.make("div", "", ["bg"], div);
             bg.style.backgroundImage = 'url('+asset.getImage()+')';
@@ -969,7 +970,7 @@ pm.addPage(
 
             const st = inputSearch.value.toLowerCase().trim();
 
-            rows.forEach(el => {
+            assetRows.forEach(el => {
                 
                 const visible = !st || el.dataset._n.includes(st); // Todo: could improve this search
                 el.classList.toggle("hidden", !visible);
@@ -1007,6 +1008,13 @@ pm.addPage(
         this._getAssetById = (id) => {
             for( let u of assets ){
                 if( u.id === id )
+                    return u;
+            }
+        };
+
+        this._getAssetByBarcode = barcode => {
+            for( let u of assets ){
+                if( u.barcode === barcode )
                     return u;
             }
         };
@@ -1054,6 +1062,9 @@ pm.addPage(
             "comment",
             "complete"
         ];
+
+        this._inputs.loanable.checked = Boolean(localStorage.assetEdit_loanable);
+        this._inputs.type.value = localStorage.assetEdit_type || "";
 
         
         let asset = this._getAssetById(id);
@@ -1115,10 +1126,29 @@ pm.addPage(
         spanHolder.innerText = holder.nick;
         spanOwner.dataset.id = owner.id;
         spanOwner.innerText = owner.nick;
-        
+
+        const onBarcodeChange = async () => {
+
+            const val = this._inputs.barcode.value;
+            if( val ){
+                const req = await pm.restReq("InventoryBarcodeExists", val);
+                if( req ){
+                    pm.addNotice("Notera: Streckkoden existerar redan");
+                }
+            }
+
+        };
+        this._inputs.barcode.onchange = onBarcodeChange;
+        this._inputs.barcode.onkeydown = event => {
+            if( event.keyCode === 13 ){ // prevent enter because the handscanner tries to submit immediately
+                event.preventDefault();
+                return false;
+            }
+        };
         this._inputs.scanBarcode.onclick = event => {
             scanner.run(pm, data => {
                 this._inputs.barcode.value = data.code;
+                onBarcodeChange();
             });
         };
         this._inputs.useWebcam.onclick = event => {
@@ -1145,6 +1175,10 @@ pm.addPage(
             jData.holder = Math.trunc(spanHolder.dataset.id);
             jData.owner = Math.trunc(spanOwner.dataset.id);
 
+            localStorage.assetEdit_loanable = jData.loanable || "";
+            localStorage.assetEdit_type = jData.type;
+
+
             // formdata includes file and args
             if( this._inputs.image.type !== "hidden" )
                 out.append('file', this._inputs.image.files[0]);
@@ -1160,7 +1194,6 @@ pm.addPage(
             }
                 
             
-            console.log(jData.imgURL);
             out.append("args", JSON.stringify([id, jData]));
 
             this._submit.value = 'Sparar...';

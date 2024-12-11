@@ -13,15 +13,5 @@
 - Discord/app/ebas sync?
 - Backups
 	- ???
-- Hosting
-	- ???
 
-
-:: Kiosklista ::
-- Logga in användare genom att scanna ett nummer.
-- Lägg till så man kan swisha in pengar.
-	- Max/min belopp
-- Lägg till så man kan handla produkter
-	- Måste kolla om produkten är aktiv, och har ett pris
-	- Logga
-
+	

@@ -170,7 +170,7 @@
 					<input type="text" name="name" required />
 					Streckkod<br />
 					<div class="formFlex">
-						<input type="text" name="barcode" required />
+						<input type="text" name="barcode" />
 						<input type="button" class="scanBarcode" value="Scanna" name="scanBarcode" />
 					</div>
 					Ägare: <span class="owner"></span> <input type="button" name="editOwner" value="Ändra" style="display:inline-block" /><br />
@@ -212,6 +212,7 @@
 					Beskrivning<br />
 					<textarea name="description"></textarea>
 					<input type="submit" value="Spara" />
+					<input type="button" class="restart" data-href="assetEdit" value="Börja Om" />
 				</form>
 			</div>
 

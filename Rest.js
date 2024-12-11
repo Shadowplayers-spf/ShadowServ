@@ -328,27 +328,29 @@ export default class Rest{
 
     /*
         Takes a barcode and returns if it exists
+        includeNotActive may only be used by admins
         On success, returns:
         {
             type : "ShopItem" / "Inventory",
             data : (obj)asset_data
         }
     */
-    async pvtBarcodeScanned( code ){
+    async pvtBarcodeScanned( code, includeNotActive = false ){
         
+        includeNotActive = includeNotActive && this.user.isAdmin();
+
         code = String(code);
         // First check if a product exists
         let item = await ShopItem.get({barcode : code}, 1);
-        if( item?.exists() && item.active )
+        if( item?.exists() && (item.active || includeNotActive) )
             return {
                 type : 'ShopItem',
                 data : await item.getOut()
             };
 
-
         // Then try inventory
         item = await Inventory.get({barcode : code}, 1);
-        if( item?.exists() && item.active )
+        if( item?.exists() && (item.active || includeNotActive) )
             return {
                 type : 'Inventory',
                 data : await item.getOut()
@@ -511,6 +513,18 @@ export default class Rest{
         }
 
         return await cur.getOut(true);
+
+    }
+
+    /*
+        Checks if a barcode exists already
+    */
+    async admInventoryBarcodeExists( code ){
+
+        if( !code )
+            return false;
+        const cur = await Inventory.get({barcode:code}, 1);
+        return Boolean(cur); 
 
     }
 
