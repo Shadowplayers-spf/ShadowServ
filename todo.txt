@@ -14,4 +14,7 @@
 - Backups
 	- ???
 
+- Enbart administratörer ska kunna logga in alls
+- 
+
 	
