@@ -140,6 +140,9 @@ export default class Rest{
         if( !att ){
             throw new Error("Felaktig användare/lösenord. Försök igen!");
         }
+        if( !this.user.isAdmin() ){
+            throw new Error("Enbart administratörer kan använda denna tjänsten.");
+        }
         const out = await this.user.getOut(true);
         return out;
         

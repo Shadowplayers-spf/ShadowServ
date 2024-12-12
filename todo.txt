@@ -13,8 +13,3 @@
 - Discord/app/ebas sync?
 - Backups
 	- ???
-
-- Enbart administratörer ska kunna logga in alls
-- 
-
-	
