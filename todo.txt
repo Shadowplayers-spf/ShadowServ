@@ -1,15 +1,1 @@
-- Swish funkar inte (förmodligen certifikatfel)
-- Admin log
-- Kolla hur det gäller med swish om man kan ha ett certifikat enbart för att ta emot pengar
-- Backups?
-- Ska registreringen vara privat eller offentlig?
-
-- Offline/App:
-	x Add webmanifest.
-	x Create logos
-	x Serviceworker :: Need cache
-
-- Put swish online
-- Discord/app/ebas sync?
-- Backups
-	- ???
+- Backups !

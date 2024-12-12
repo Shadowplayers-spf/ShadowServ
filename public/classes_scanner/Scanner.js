@@ -2,8 +2,6 @@ import Rest from "../classes/Rest.js";
 import User from "../classes/User.js";
 import ShopItem from "../classes/ShopItem.js";
 
-let password = '';
-
 export default class Scanner{
 
 	text = '';
@@ -21,7 +19,7 @@ export default class Scanner{
 
 	initRest( task, args = []){
 		return new Rest(task, args, {
-			scanner : localStorage.token || ''
+			scanner : localStorage.scanner_token || ''
 		});
 	}
 
@@ -75,7 +73,7 @@ export default class Scanner{
 
 			const out = await req.run();
 			if( out ){
-				localStorage.token = out;
+				localStorage.scanner_token = out;
 				this.setPage("main");
 				this.onLoggedIn();
 			}
@@ -93,7 +91,7 @@ export default class Scanner{
             this.login(loginForm.querySelector("input[name=password]").value);
 		};
 
-		if( localStorage.token ){
+		if( localStorage.scanner_token ){
 
 			const rest = this.initRest("ValidateToken");
 			const out = await rest.run();

@@ -128,7 +128,7 @@ export default class User extends DB{
 
     validateNick( nick ){
         nick = String(nick).trim();
-        if( !nick.match(/^[0-9a-z]+$/i) || nick.length < 3 || nick.length > 20 )
+        if( !nick.match(/^[0-9a-z åäö]+$/i) || nick.length < 3 || nick.length > 20 )
             throw new Error("Invalid nick "+nick);
         return nick;
     }

@@ -63,7 +63,6 @@ export default class Rest{
         if( this.body.scanner !== undefined ){
 
             // Validate scanner
-
             // Login in the only one that doesn't need to check token
             if( task !== 'Login' ){
 
