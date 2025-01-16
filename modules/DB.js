@@ -74,6 +74,10 @@ export default class DB{
         
     }
 
+    async delete(){
+        return await this.query("DELETE FROM "+this.constructor.table+" WHERE id=?", this.id);
+    }
+
 
     async query( query, params = [], transaction = undefined ){
 

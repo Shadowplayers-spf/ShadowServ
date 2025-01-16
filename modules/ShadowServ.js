@@ -2,7 +2,8 @@ import express from 'express';
 import Rest from '../Rest.js';
 import Multer from 'multer';
 import fs from 'fs';
-
+import {Server as io} from 'socket.io';
+import SocketManager from './SocketManager.js';
 
 const mul = Multer({dest : 'tmp', limits : {
     fieldSize : 4*1024*1024 // 4mb
@@ -16,6 +17,7 @@ export default class ShadowServ{
 		this.app = express();
 		this.port = port;
 		this.components = {};			// Components are subclasses that extend Component
+        this.io = new SocketManager();
 
 	}
 	
@@ -28,9 +30,16 @@ export default class ShadowServ{
             res.json(await this.runRest(req));
 
         });
-		this.app.listen(this.port, () => {
+		const server = this.app.listen(this.port, () => {
 			console.log(`ShadowServ online on port ${this.port}`)
 		});
+
+        const sio = new io(server, {
+			allowEIO3: true,
+		});
+        this.io.begin(sio);
+
+        
 		
 	}
 
