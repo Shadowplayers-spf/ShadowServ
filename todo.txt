@@ -1,4 +1,7 @@
 - Socket.io support
-
+	- Frontend
+		- Trigger immediate override (and turn off)
+		- Master switch (prevents ALL charging until toggled off)
+		- Schedule
 
 - Backups !

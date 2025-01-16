@@ -40,6 +40,7 @@ export default class SocketManager{
 					return;
 
 				let devid = data.id,
+					devtype = data.type,
 					task = data.task,
 					args = data.args
 				;
@@ -47,7 +48,13 @@ export default class SocketManager{
 					args = [];
 				}
 
-				this.handleDeviceTask(socket, devid, task, args)
+				// Device might not support callbacks
+				if( typeof callback !== "function" )
+					callback = data => {
+						socket.emit(task, data);
+					};
+
+				this.handleDeviceTask(socket, devid, devtype, task, args)
 				.then(data => {
 					callback({
 						success : true,
@@ -55,7 +62,7 @@ export default class SocketManager{
 					});
 				})
 				.catch(err => {
-					console.error(err);
+					console.error("Caught device error", err);
 					callback({
 						success : false,
 						data : err && err.message !== undefined ? err.message : err
@@ -68,7 +75,7 @@ export default class SocketManager{
 
 	}
 
-	async handleDeviceTask( socket, devid, task, args ){
+	async handleDeviceTask( socket, devid, devtype, task, args ){
 
 		const fn = this['dev'+task];
 		if( !fn )
@@ -79,13 +86,13 @@ export default class SocketManager{
 		if( !device ){
 			if( !Device.isValidId(devid) )
 				throw new Error("Invalid device ID supplied");
-			if( !Device.isValidType(type) )
+			if( !Device.isValidType(devtype) )
 				throw new Error("Invalid device type supplied");
 
 			// Need to insert
 			device = new Device({
-				devid,
-				type
+				deviceid : devid,
+				type : devtype
 			});
 			await device.saveOrInsert();
 
@@ -119,7 +126,7 @@ export default class SocketManager{
 	async devSetStatus( device, data ){
 
 		if( typeof data !== "object" || !data )
-			throw new Error("Invalid data supplied to SetStatus");
+			throw new Error("Invalid data supplied to SetStatus: "+(typeof data));
 
 		device.status = data;
 		await device.saveOrInsert();
@@ -130,7 +137,7 @@ export default class SocketManager{
 
 	async devGetConfig( device ){
 		return {
-			config : device.config
+			config : device.getConfig()
 		};
 	}
 
