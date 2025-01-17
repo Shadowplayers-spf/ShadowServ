@@ -1,5 +1,6 @@
 import DB from "./DB.js";
 import Device from "./Device.js";
+import User from "./User.js";
 
 export default class SocketManager{
 
@@ -71,6 +72,25 @@ export default class SocketManager{
 
 			});
 
+			/*
+				These are sent by the client app.
+				{
+					task : (str)task,
+					args : (arr)args
+				}
+			*/
+			socket.on('clientTask', (data, callback) => {
+
+				if( typeof data !== "object" || !data )
+					return;
+
+				let task = data.task,
+					args = data.args
+				;
+				this.handleClientTask(socket, task, args, callback);
+
+			});
+
 		});
 
 	}
@@ -110,6 +130,33 @@ export default class SocketManager{
 
 	}
 
+	async handleClientTask( socket, task, args, callback ){
+
+		try{
+			if( task !== "Join" && !socket.data.admin )
+				throw new Error("Access denied");
+			let fn = this['cli'+task];
+			if( !fn )
+				throw new Error("Received invalid task: "+task);
+			let out = await fn.call(this, socket, ...args);
+			if( typeof callback === "function" )
+				callback({
+					success : true,
+					data : out
+				});
+
+		}catch(err){
+			console.error("Caught clientTask error", err);
+			if( typeof callback === "function" )
+				callback({
+					success : false,
+					data : err && err.message !== undefined ? err.message : err
+				});
+			return;
+		}
+
+	}
+
 	async getDeviceBySocket( socket ){
 		return await Device.get(socket.data.id, 1);
 	}
@@ -123,6 +170,9 @@ export default class SocketManager{
 
 	}
 
+
+
+	/* Endpoint for physical devices */
 	async devSetStatus( device, data ){
 
 		if( typeof data !== "object" || !data )
@@ -130,28 +180,80 @@ export default class SocketManager{
 
 		device.status = data;
 		await device.saveOrInsert();
-		// Todo: emit to app rooms
+		this.appRefreshAdmins();
 		return true;
 
 	}
 
 	async devGetConfig( device ){
 		return {
-			config : device.getConfig()
+			config : device.getConfig(),
+			active : device.active
 		};
 	}
 
 
+	/*
+		Endpoint for frontend
+	*/
+	async cliJoin( socket, loginToken ){
+
+		const user = await User.get({session_token:loginToken}, 1);
+		if( !user || !user.exists() )
+			throw new Error("Invalid login token");
+		if( !user.isAdmin() )
+			throw new Error("Access denied");
+
+		socket.data.admin = true;
+		// join admin room
+		socket.join("admin");
+
+		return true;
+
+	}
+
+
+
+
+	/*
+		Internal for Rest/ShadowServ to access
+	*/
+
 	// From app to device
-	async appSendToDevice( device, task, data ){
+	appSendToDevice( device, task, data ){
 
 		if( !(device instanceof Device) ){
 			throw new Error("Device must be of type Device in appSendToDevice");
 		}
 
-		this.io.to("dev__"+device.id).emit(task, data);
+		this.io.to("dev__"+device.id).emit(task, {
+			success : true,
+			data
+		});
 
 
+	}
+
+	appSendDeviceConfig( device ){
+
+		if( !(device instanceof Device) ){
+			throw new Error("Device must be of type Device in appSendToDevice");
+		}
+
+		this.appSendToDevice(device, "GetConfig", {
+			config : device.getConfig()
+		});
+		this.appRefreshAdmins({
+			// Note that these are currently ignored, the page refreshes all devices
+			type : "Device",
+			id : device.id
+		});
+
+
+	}
+
+	appRefreshAdmins(data){
+		this.io.to("admin").emit("RefreshAdmins", data || {});
 	}
 
 

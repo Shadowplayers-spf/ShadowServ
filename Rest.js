@@ -14,9 +14,11 @@ import Etc from './modules/Etc.js';
 import Bcrypt from 'bcrypt';
 import Crypto from 'crypto';
 import ScannerTransaction from './modules/ScannerTransaction.js';
+import Device from './modules/Device.js';
 
 export default class Rest{
 
+    // server is a ShadowServ instance
     constructor( server, req = {} ){
 
         this.files = req.files;
@@ -38,6 +40,10 @@ export default class Rest{
             }
         }
 
+    }
+
+    getSocketManager(){
+        return this.server.io;
     }
 
     async getUser(){
@@ -119,7 +125,7 @@ export default class Rest{
             }
         }
 
-        throw new Error("Task invalid: "+task);
+        throw new Error("Task not found: "+task);
 
     }
 
@@ -715,6 +721,37 @@ export default class Rest{
         return out;
 
     }
+
+    /*
+
+    */
+    async admSetDeviceConf( id, conf = {}){
+
+        const device = await Device.get(id);
+        if( !device || !device.exists() )
+            throw new Error("Device not found");
+
+        let name = String(conf.name).substring(0,64).trim() || 'Unnamed Device';
+        let active = Boolean(conf.active);
+        if( conf.name !== undefined )
+            device.name = name;
+        if( conf.active !== undefined )
+            device.active = active;
+        await device.setConfig(conf.config);
+        this.getSocketManager().appSendDeviceConfig(device);
+        return true;
+
+    }
+    
+    async admGetDevices( onlineOnly = true ){
+
+        const devices = onlineOnly ? await Device.getOnline() : await Device.getAll();
+        
+        return await Promise.all(devices.map(el => el.getOut(true)));
+
+    }
+
+
 
     /* Scanner endpoints */
     // Returns a token on success

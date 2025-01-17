@@ -12,6 +12,7 @@ export default class Device extends DB{
 
 	static table = "devices";
 
+	// Note: needs to be mirrored in public/classes/Device.js
 	static TYPES = {
 		SmartSwitch : 'SmartSwitch',
 	};
@@ -27,6 +28,7 @@ export default class Device extends DB{
 		this.config = {}; // use getConfig
 		this.status = {};
 		this.last_seen = 0;
+		this.active = true;			// Whether the device should be doing its thing. Lets you stop a device entirely.
 
 		this.load(...arguments);
 	}
@@ -36,6 +38,20 @@ export default class Device extends DB{
 
 		let tmpConf = new DeviceConfig(this, this.config);
 		return tmpConf.getOut();
+
+	}
+
+	async setConfig( config = {}, save = true ){
+
+		// Allows us to send partial configs and only affect the ones sent
+		let out = structuredClone(this.config);
+		for( let i in config )
+			out[i] = config[i];
+
+		let cfg = new DeviceConfig(this, out);
+		this.config = cfg.getSaveData();
+		if( save )
+			await this.saveOrInsert();
 
 	}
 	
@@ -53,6 +69,7 @@ export default class Device extends DB{
 			config : this.getConfig(),
 			status : this.status,
 			last_seen : this.last_seen,
+			active : this.active,
 		};
 
 		if( admin ){
@@ -102,6 +119,11 @@ export default class Device extends DB{
 
 	}
 
+	static async getOnline(){
+		const rows = await this.query("SELECT * from "+this.table+" WHERE last_seen > UNIX_TIMESTAMP()-3600 ORDER BY name");
+		return rows.map(el => new this(el));
+	}
+
 	static isValidType( type ){
 		return this.TYPES[type] !== undefined;
 	}
@@ -122,6 +144,7 @@ export default class Device extends DB{
 
 
 // Helps generate proper config data based on device type
+// Note that device config should only be for individual device types. If a property should be avialable for ALL devices, set it as a device table property instead.
 export class DeviceConfig{
 
 	static ON_DUR = 3600e3*6; // on for 3h
@@ -129,7 +152,6 @@ export class DeviceConfig{
 	static Prototypes = {
 		[Device.TYPES.SmartSwitch] : {
 			// User settable
-			active : true,		// when false, turn off until manually turned on again
 			weekly : [],		// objects of {day:0-6 (0=monday), hour:0-23}
 			override : 0,		// Time when we last did an override. Override lasts for 6 hours.
 			// Automatic (prefix these with a_ to indicate automatic)
@@ -147,6 +169,40 @@ export class DeviceConfig{
 
 	}
 
+	// Sanitizes data to be sent to DB
+	getSaveData(){
+
+		const def = DeviceConfig.Prototypes[this.parent.type];
+		if( !def ){
+			console.error("Note: Missing config prototype for device type", this.parent.type);
+			return {};
+		}
+		let template = structuredClone(def);
+		for( let i in this.data )
+			template[i] = this.data[i];
+
+		// Remove auto generated config
+		let out = {};
+		for( let i in template ){
+			if( !i.startsWith("a_") )
+				out[i] = template[i];
+		}
+		return out;
+
+	}
+
+	// Converts sunday first to monday first
+	getCurrentDay(){
+		let currentDay = new Date().getDay()-1;
+		if( currentDay < 0 )
+			currentDay = 6;
+		return currentDay;
+	}
+	getCurrentHour(){
+		return new Date().getHours();
+	}
+
+	// Get data to send to the device
 	getOut(){
 
 		const def = DeviceConfig.Prototypes[this.parent.type];
@@ -160,47 +216,82 @@ export class DeviceConfig{
 		if( this.parent.type === Device.TYPES.SmartSwitch ){
 			
 			// Monday first
-			let currentDay = new Date().getDay()-1;
-			if( currentDay < 0 )
-				currentDay = 6;
-			let currentHour = new Date().getHours();
+			let currentDay = this.getCurrentDay();
+			let currentHour = this.getCurrentHour();
 
 			const override = Math.trunc(this.data.override) || 0;
 
 			// Calculate when the next on should be
-			let nextOn = 0;
+			let nextOn = undefined;
 			let nextDur = 0;
-			if( out.active ){
+			if( this.parent.active ){
 
-				console.log("override", this.data.override, Date.now()-override, DeviceConfig.ON_DUR);
 				if( override > 0 && Date.now()-override < DeviceConfig.ON_DUR ){
 					nextOn = override-Date.now(); // Negative to turn into "started n ms ago"
 					nextDur = DeviceConfig.ON_DUR;
 				}
 				else{
 
+					let blk = false;
+
 					// Check weekly
 					for( let obj of out.weekly ){
 						
 						let day = Math.trunc(obj.day) || 0;
 						let hour = Math.trunc(obj.hour) || 0;
+						
 						if( day < currentDay )
 							day += 7; // Make sure the day is not in the past
 						day -= currentDay; // Creates an offset from 0-6
-						hour -= currentHour; // 
+						hour -= currentHour; // Creates an offset
+						
 						let startOffs = day*3600e3*24 + hour*3600e3;
 						// This one has expired, add a week to it
 						if( startOffs < -DeviceConfig.ON_DUR )
 							startOffs += 3600e3*24*7;
 
-						if( 
-							// If either is positive, use the lowest value
-							((startOffs > 0 || nextOn > 0) && startOffs < nextOn) ||
-							// If both are in the past, use the most recent
-							(startOffs < 0 && nextOn < 0 && Math.abs(startOffs) < Math.abs(nextOn))
-						){
+						startOffs -= (Date.now() % 3600e3); // Takes millis since top of hour into consideration to give an exact time
+						
+						if(
+							nextOn === undefined ||
+							// If both block are started (overlapping blocks), we go with the most recent one
+							(nextOn < 0 && startOffs < 0 && Math.abs(startOffs) < Math.abs(nextOn) ) ||
+							// Otherwise if we have a positive next start time (unstarted), we just check if the incoming one is smaller
+							(nextOn >= 0 && startOffs < nextOn)
+						 ){
 							nextOn = startOffs;
 							nextDur = DeviceConfig.ON_DUR;
+							blk = obj;
+						}
+						
+					}
+
+					// It's on. We should check if there's a block within a distance, just to bridge the gap
+					if( nextOn <= 0 ){
+
+
+						let blkDay = Math.trunc(blk.day) || 0;
+						let blkHour = Math.trunc(blk.hour) || 0;
+						let blkDayEnd = (blkDay + ((blk.hour + DeviceConfig.ON_DUR/3600e3) >= 24))%7;
+						let blkHourEnd = (blk.hour + DeviceConfig.ON_DUR/3600e3)%24;
+
+						// Is there a block within this timeframe?
+						for( let obj of out.weekly ){
+							// Skip self
+							if( obj === blk )
+								continue;
+							let oDay = Math.trunc(obj.day) || 0;
+							let oHour = Math.trunc(obj.hour) || 0;
+							const dayIsCorrect = blkDay === oDay || blkDayEnd === oDay; // Day can only be one of two, since we don't do +24h on times. Though this has to change if you for some reason would
+							const hourIsCorrect = 
+								(blkHourEnd < blkHour && oHour >= blkHourStart && oHour <= blkHourEnd ) ||
+								(blkHourEnd > blkHour && oHour >= blkHour && oHour <= blkHourEnd );
+							if( dayIsCorrect && hourIsCorrect ){
+								nextDur += 3600e3; // Add an extra hour to bridge the gap. The device can request updates in this hour.
+								break;
+							}
+
+
 						}
 
 					}
@@ -210,12 +301,15 @@ export class DeviceConfig{
 			out.a_NextOn = nextOn;
 			out.a_Dur = nextDur;
 
+			//console.log("nextOn", nextOn, "dur", nextDur);
+
 		}
 
 		return out;
 		
 
 	}
+
 
 }
 

@@ -139,7 +139,7 @@
         margin-bottom: var(--input-margin-bottom);
         font-size:var(--font-size-default);
     }
-    input.inline{
+    input.inline, select.inline{
         display:inline-block;
         margin: 0 0.5vmax 0.5vmax 0;
     }
@@ -284,7 +284,7 @@
         border: var(--color-cyberpunk) 1px solid;
         box-shadow: var(--shadow-default);
         border-top-right-radius: var(--radius-default);
-        overflow:auto;
+        overflow:visible;
     }
     #modal{
         left:0; right:0;
@@ -672,6 +672,27 @@
 
 
 /**/
+
+/* Page: Devices */
+
+    #page-deviceManager div.device{
+        padding: 2vmax 1vmax;
+        display:flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 2.5vmax;
+        border: var(--color-bright-green) 0.25vmax solid;
+        background:var(--background-black-default);
+        box-shadow: var(--shadow-default);
+        border-top-right-radius: var(--radius-default);
+        color: var(--color-bright-green);
+        box-sizing: border-box;
+        margin-bottom: 0.25vmax;
+    }
+    #page-deviceManager div.device.red{
+        border-color: var(--color-bright-red);
+        color: var(--color-bright-red);
+    }
 
 /* Assets */
 

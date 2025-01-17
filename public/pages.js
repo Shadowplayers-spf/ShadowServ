@@ -3,6 +3,7 @@ import PageManager from "./classes/Page.js";
 import ShopItem from "./classes/ShopItem.js";
 import templates from "./templates.js";
 import Inventory from "../classes/Inventory.js";
+import Device from "./classes/Device.js";
 
 const pm = new PageManager();
 export default pm;
@@ -716,6 +717,56 @@ pm.addPage(
     "user"
 );
 
+// Devices
+pm.addPage(
+    "deviceManager",     // id
+    true,       // Private
+    // onLoad
+    async function(){
+
+        this.refreshDevices = async () => {
+
+            let devices = await pm.restReq("GetDevices", [true]);
+            devices = devices.map(el => new Device(el));
+            let divs = [];
+            for( let device of devices ){
+                const div = device.getDashDiv();
+                div.onclick = () => {
+                    pm.setModal(device.getModal(pm), true, true);
+                };
+                divs.push(div);
+            }
+            this.deviceDiv.replaceChildren(...divs);
+
+        };
+
+    },
+    // onBuild
+    async function(){
+        
+        const user = pm.user,
+            dom = this.getDom(),
+            admin = user.privilege >= 10
+        ;
+        this.deviceDiv = dom.querySelector("div.devices");
+        
+        this.refreshDevices();
+
+    },
+    // onUnload
+    async function(){
+
+    },
+    "user", // back
+    // onAdminRefresh
+    async function(){
+        try{
+            await this.refreshDevices();
+        }catch(e){
+            pm.addError(e?.message ? e.message : e);
+        }
+    }
+);
 
 
 // storeEdit

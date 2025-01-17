@@ -12,6 +12,18 @@ export default class PageManager{
         this.user = new User();
         this.back = null;
         this.onModalClose = null;
+        this.io = io({
+            autoConnect : false
+        });
+        this.io.on("connect", () => {
+            console.log("WSS connected");
+        });
+        this.io.on("disconnect", () => {
+            console.log("WSS disconnected");
+        });
+        this.io.on("RefreshAdmins", data => {
+            this.onAdminRefresh(data);
+        });
 
     }
 
@@ -22,6 +34,22 @@ export default class PageManager{
 
         this.user = user;
         localStorage.token = user.session_token;
+
+        if( this.io ){
+            this.io.disconnect();
+        }
+        if( this.user.exists() && this.io ){
+            this.io.connect();
+            this.io.emit("clientTask", {
+                task : "Join",
+                args : [this.user.session_token]
+            }, (res) => {
+                if( res && !res.success )
+                    this.addError(res.data);
+                else
+                    this.onAdminRefresh();
+            });
+        }
 
     }
 
@@ -46,6 +74,14 @@ export default class PageManager{
         if( !this.page )
             await this.setPage(this.user.exists() ? "user" : "login");
 
+        
+
+    }
+
+    onAdminRefresh( data ){
+        if( this.page && typeof this.page.onAdminRefresh === "function" ){
+            this.page.onAdminRefresh(data);
+        }
     }
 
     onBack(){
@@ -267,7 +303,7 @@ export class UserError{
 }
 
 export class Page{
-    constructor(parent, id, pvt = true, onLoad, onBuild, onUnload, back){
+    constructor(parent, id, pvt = true, onLoad, onBuild, onUnload, back, onAdminRefresh){
         
         this.parent = parent;
         this.firstLoad = false;     // Available in onLoad, lets you bind static stuff
@@ -282,6 +318,8 @@ export class Page{
             this.onBuild = onBuild;
         if( onUnload )
             this.onUnload = onUnload;
+        if( onAdminRefresh )
+            this.onAdminRefresh = onAdminRefresh;
 
     }
     
