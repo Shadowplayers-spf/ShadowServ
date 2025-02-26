@@ -198,10 +198,18 @@ export default class Device extends DbAsset{
 			turnOn.type = "button";
 			turnOn.value = "Ladda Nu 6 Timmar";
 			form.appendChild(turnOn);
+
+			// Physical override is active
+			if( this.status.local ){
+				const span = document.createElement("em");
+				form.appendChild(span);
+				span.innerText = "Notera: För att avbryta laddning måste du trycka på fysiska knappen på enheten.";
+			}
+
 			turnOn.onclick = async () => {
 
 				if( await pm.restReq("SetDeviceConf", [this.id, {
-					config : {override:Date.now()}
+					config : {override:"%UTIME%"}
 				}]) ){
 					onOff.turnOn.classList.toggle("hidden", true);
 					onOff.turnOff.classList.toggle("hidden", false);

@@ -187,7 +187,7 @@ export default class SocketManager{
 
 	async devGetConfig( device ){
 		return {
-			config : device.getConfig(),
+			config : device.getConfigSocket(),
 			active : device.active
 		};
 	}
@@ -226,6 +226,7 @@ export default class SocketManager{
 			throw new Error("Device must be of type Device in appSendToDevice");
 		}
 
+		console.log("Sending", data, "to", device.id);
 		this.io.to("dev__"+device.id).emit(task, {
 			success : true,
 			data
@@ -234,15 +235,14 @@ export default class SocketManager{
 
 	}
 
-	appSendDeviceConfig( device ){
+	async appSendDeviceConfig( device ){
 
 		if( !(device instanceof Device) ){
 			throw new Error("Device must be of type Device in appSendToDevice");
 		}
 
-		this.appSendToDevice(device, "GetConfig", {
-			config : device.getConfig()
-		});
+		const out = await this.devGetConfig(device);
+		this.appSendToDevice(device, "GetConfig", out);
 		this.appRefreshAdmins({
 			// Note that these are currently ignored, the page refreshes all devices
 			type : "Device",

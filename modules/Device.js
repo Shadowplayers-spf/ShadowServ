@@ -41,6 +41,24 @@ export default class Device extends DB{
 
 	}
 
+	// Returns a smaller config with only required stuff for the device
+	getConfigSocket(){
+
+		let tmpConf = new DeviceConfig(this, this.config);
+		let cnf = tmpConf.getOut();
+		let out = {};
+
+		if( this.type === Device.TYPES.SmartSwitch ){
+			out.a_Dur = cnf.a_Dur;
+			out.a_NextOn = cnf.a_NextOn;
+		}
+
+
+		return out;
+
+	}
+
+
 	async setConfig( config = {}, save = true ){
 
 		// Allows us to send partial configs and only affect the ones sent
@@ -166,6 +184,14 @@ export class DeviceConfig{
 		if( !data || typeof data !== "object" )
 			data = {};
 		this.data = structuredClone(data);
+		for( let i in data ){
+			if( typeof data[i] === "string" && data[i].includes("%UTIME%") ){
+				if( data[i] === "%UTIME%" )
+					this.data[i] = Date.now();
+				else
+					this.data[i] = this.data[i].replace("%UTIME%", Date.now());
+			}
+		}
 
 	}
 
