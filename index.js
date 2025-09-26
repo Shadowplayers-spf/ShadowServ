@@ -10,18 +10,33 @@ import ShopItem from './modules/ShopItem.js';
 (async () => {
     
 
-    try{
-        await DB.begin(Config.mysql_user, Config.mysql_pass, Config.mysql_db);
+    let success = false;
+    for( let i = 0; i < 60; ++i ){
+
+        try{
+            await DB.begin(Config.mysql_user, Config.mysql_pass, Config.mysql_db, "mariadb");
+            success = true;
+            console.log("SQL Connection established");
+            break;
+        }
+        catch(err){
+            console.error("Failed to connect to MYSQL, retrying");
+            console.error(err);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
     }
-    catch(err){
-        console.error("Failed to connect to MYSQL");
-        console.error(err);
+
+    if( !success ){
+        console.log("Too many failed attempts, dropping out...");
         process.exit();
     }
+
+
     const server = new ShadowServ();
     server.begin();
     server.addComponent("ebas", new Ebas(Config.ebas_id, Config.ebas_key));
-    Swish.begin(false); // Set to true for live
+    //Swish.begin(false); // Set to true for live
 
 
     /* Unit tests*/

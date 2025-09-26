@@ -5,6 +5,11 @@ import fs from 'fs';
 import {Server as io} from 'socket.io';
 import SocketManager from './SocketManager.js';
 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const mul = Multer({dest : 'tmp', limits : {
     fieldSize : 4*1024*1024 // 4mb
 }}); // Relative to index
@@ -23,7 +28,7 @@ export default class ShadowServ{
 	
 	begin(){
 		
-        this.app.use(express.static('public'));
+        this.app.use(express.static(__dirname+'/../public'));
         this.app.use(express.json());
         this.app.post("/api", mul.any(), async (req, res) => {
             
