@@ -706,16 +706,15 @@ export default class Rest{
     /*
     
     */
-    async admRegister( nick, password, discord = "", card = "" ){
+    async admRegister( nick, password, card = "" ){
 
         nick = String(nick).trim();
         password = String(password);
-        discord = String(discord).trim();
 
         const user = new User();
 
         // The rest is handled by User
-        await user.register(nick, password, discord, card);
+        await user.register(nick, password, card);
 
         const out = await this.user.getOut(true);
         return out;

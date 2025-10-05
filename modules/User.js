@@ -13,7 +13,6 @@ export default class User extends DB{
         this.privilege = 0;
         this.member = 0;
         this.password = "";
-        this.discord = "";
         this.session_token = "";
         this.session_token_generated = 0;
         this.shop_credit = 0;       // Hela ören
@@ -31,7 +30,6 @@ export default class User extends DB{
             updated : this.updated,
         };
         if( full ){
-            out.discord = this.discord;
             out.member = this.member;
             out.session_token = this.session_token;
             out.shop_credit = this.shop_credit;
@@ -151,13 +149,12 @@ export default class User extends DB{
 
     }
 
-    async register( nick, pass, discord, card ){
+    async register( nick, pass, card ){
         
         nick = this.validateNick(nick);
 
         pass = this.testPasswordSecurity(pass);
 
-        this.discord = String(discord).substring(0,64);
         this.nick = nick;
         this.password = await this.hashPassword(pass);
         if( !card || (!isNaN(card) && !Math.trunc(card)) )
@@ -168,7 +165,7 @@ export default class User extends DB{
         if( ex?.id )
             throw new Error("User already exists");
 
-        const q = await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, discord, card) VALUES (?,?,?,?,?,?)", [this.nick, 1, 0, this.password, this.discord, card]);
+        const q = await User.query("INSERT INTO "+User.table+" (nick, privilege, member, password, card) VALUES (?,?,?,?)", [this.nick, 1, 0, this.password, card]);
         this.id = q.insertId;
         if( !this.id )
             return false;
@@ -234,8 +231,6 @@ export default class User extends DB{
             this.card = Math.trunc(data.card) || 0;
         if( data.hasOwnProperty("member") )
             this.member = Math.trunc(data.member) || 0;
-        if( data.hasOwnProperty("discord") )
-            this.discord = String(data.discord).trim();
         if( data.hasOwnProperty("shop_credit") ){
             
             data.shop_credit = Math.trunc(data.shop_credit);
@@ -245,8 +240,8 @@ export default class User extends DB{
 
         }
 
-        await this.query("UPDATE "+this.constructor.table+" SET nick=?, privilege=?, member=?, discord=?, shop_credit=?, card=? WHERE id=?", [
-            this.nick, this.privilege, this.member, this.discord, this.shop_credit, this.card, this.id
+        await this.query("UPDATE "+this.constructor.table+" SET nick=?, privilege=?, member=?, shop_credit=?, card=? WHERE id=?", [
+            this.nick, this.privilege, this.member, this.shop_credit, this.card, this.id
         ]);
         
     }

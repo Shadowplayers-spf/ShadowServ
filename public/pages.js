@@ -75,11 +75,10 @@ pm.addPage(
             const
                 user = dom.querySelector("input[name=username]").value,
                 pass = dom.querySelector("input[name=password]").value,
-                discord = dom.querySelector("input[name=discord]").value,
                 card = dom.querySelector("input[name=card]").value
             ;
 
-            const req = await pm.restReq("Register", [user, pass, discord, card]);
+            const req = await pm.restReq("Register", [user, pass, card]);
             if( req ){
                 //console.log("Setting user and page");
                 //pm.setUser(new User(req));
@@ -87,7 +86,6 @@ pm.addPage(
                 pm.addNotice("Ny användare har skapats. Dela lösenordet "+pass);
 
                 dom.querySelector("input[name=username]").value = "";
-                dom.querySelector("input[name=discord]").value = "";
                 dom.querySelector("input[name=card]").value = "";
                 this._resetPassField();
 
@@ -565,11 +563,6 @@ pm.addPage(
             member.name = "member";
             member.checked = Boolean(user.member);
             
-            this.make("p", "Discord", [], form);
-            const discord = this.make("input", "", [], form);
-            discord.name = "discord";
-            discord.value = user.discord;
-
             this.make("p", "SP-Kort ID", [], form);
             const card = this.make("input", "", [], form);
             card.type = 'number';
@@ -622,7 +615,6 @@ pm.addPage(
                 const uData = {
                     nick : nick.value,
                     member : +member.checked,
-                    discord : discord.value,
                     shop_credit : Math.trunc(shopCredit.value),
                     card : card.value
                 };
@@ -677,12 +669,10 @@ pm.addPage(
             tr.dataset.id = user.id;
             tr.onclick = this._onUserRowClick;
             tr.dataset._n = user.nick.toLowerCase();    // Cache lowercase datasets to speed searches up
-            tr.dataset._d = user.discord.toLowerCase(); //
 
             this.make("td", user.id, [], tr);
             this.make("td", user.nick, [], tr);
             this.make("td", user.member, [], tr);
-            this.make("td", user.discord, [], tr);
             this.make("td", user.shop_credit/100, [], tr);
             this.make("td", user.card, [], tr);
 
