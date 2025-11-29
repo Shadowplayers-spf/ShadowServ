@@ -16,6 +16,8 @@ import Crypto from 'crypto';
 import ScannerTransaction from './modules/ScannerTransaction.js';
 import Device from './modules/Device.js';
 
+const __dirname = import.meta.dirname;
+
 export default class Rest{
 
     // server is a ShadowServ instance
@@ -512,7 +514,7 @@ export default class Rest{
                 .jpeg({
                     quality : 60
                 })
-                .toFile('public/media/uploads/shop/'+cur.id+'.jpg');
+                .toFile(__dirname+'public/media/uploads/shop/'+cur.id+'.jpg');
                 
             }catch(err){
                 console.error("Unable to upload file", err);
@@ -595,7 +597,7 @@ export default class Rest{
                 .jpeg({
                     quality : 60
                 })
-                .toFile('public/media/uploads/inventory/'+cur.id+'.jpg');
+                .toFile(__dirname+'/public/media/uploads/inventory/'+cur.id+'.jpg');
                 
             }catch(err){
                 console.error("Unable to upload file", err);
